@@ -49,10 +49,10 @@ Abstract:
     ASSIGN_REG(R12)        \
     ASSIGN_REG(R13)        \
     ASSIGN_REG(R14)        \
-    ASSIGN_REG(R15)     
-#else // _AMD64_
+    ASSIGN_REG(R15)
+#else
 #error unsupported architecture
-#endif // _AMD64_
+#endif
 
 static void WinContextToUnwindContext(CONTEXT *winContext, unw_context_t *unwContext)
 {
@@ -72,8 +72,18 @@ static void WinContextToUnwindCursor(CONTEXT *winContext, unw_cursor_t *cursor)
     unw_set_reg(cursor, UNW_X86_64_R13, winContext->R13);
     unw_set_reg(cursor, UNW_X86_64_R14, winContext->R14);
     unw_set_reg(cursor, UNW_X86_64_R15, winContext->R15);
-#else
-#error unsupported architecture
+#elif defined(_ARM_)
+    unw_set_reg(cursor, UNW_ARM_R4, winContext->R4);
+    unw_set_reg(cursor, UNW_ARM_R5, winContext->R5);
+    unw_set_reg(cursor, UNW_ARM_R6, winContext->R6);
+    unw_set_reg(cursor, UNW_ARM_R7, winContext->R7);
+    unw_set_reg(cursor, UNW_ARM_R8, winContext->R8);
+    unw_set_reg(cursor, UNW_ARM_R9, winContext->R9);
+    unw_set_reg(cursor, UNW_ARM_R10, winContext->R10);
+    unw_set_reg(cursor, UNW_ARM_R11, winContext->R11);
+    unw_set_reg(cursor, UNW_ARM_R12, winContext->Sp);
+    unw_set_reg(cursor, UNW_ARM_R13, winContext->Lr);
+    unw_set_reg(cursor, UNW_ARM_R14, winContext->Pc);
 #endif
 }
 #endif
@@ -89,11 +99,24 @@ static void UnwindContextToWinContext(unw_cursor_t *cursor, CONTEXT *winContext)
     unw_get_reg(cursor, UNW_X86_64_R13, (unw_word_t *) &winContext->R13);
     unw_get_reg(cursor, UNW_X86_64_R14, (unw_word_t *) &winContext->R14);
     unw_get_reg(cursor, UNW_X86_64_R15, (unw_word_t *) &winContext->R15);
+#elif defined(_ARM_)
+    unw_get_reg(cursor, UNW_ARM_R4, (unw_word_t *) winContext->R4);
+    unw_get_reg(cursor, UNW_ARM_R5, (unw_word_t *) winContext->R5);
+    unw_get_reg(cursor, UNW_ARM_R6, (unw_word_t *) winContext->R6);
+    unw_get_reg(cursor, UNW_ARM_R7, (unw_word_t *) winContext->R7);
+    unw_get_reg(cursor, UNW_ARM_R8, (unw_word_t *) winContext->R8);
+    unw_get_reg(cursor, UNW_ARM_R9, (unw_word_t *) winContext->R9);
+    unw_get_reg(cursor, UNW_ARM_R10, (unw_word_t *) winContext->R10);
+    unw_get_reg(cursor, UNW_ARM_R11, (unw_word_t *) winContext->R11);
+    unw_get_reg(cursor, UNW_ARM_R12, (unw_word_t *) winContext->Sp);
+    unw_get_reg(cursor, UNW_ARM_R13, (unw_word_t *) winContext->Lr);
+    unw_get_reg(cursor, UNW_ARM_R14, (unw_word_t *) winContext->Pc);
 #else
 #error unsupported architecture
 #endif
 }
 
+#ifdef BIT64
 static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, PDWORD64 *contextPointer)
 {
 #if defined(__APPLE__)
@@ -111,6 +134,25 @@ static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, i
     }
 #endif
 }
+#else
+static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, PDWORD *contextPointer)
+{
+#if defined(__APPLE__)
+    // Returning NULL indicates that we don't have context pointers available
+    *contextPointer = NULL;
+#else
+    unw_save_loc_t saveLoc;
+    unw_get_save_loc(cursor, reg, &saveLoc);
+    if (saveLoc.type == UNW_SLT_MEMORY)
+    {
+        PDWORD pLoc = (PDWORD)saveLoc.u.addr;
+        // Filter out fake save locations that point to unwContext 
+        if ((pLoc < (PDWORD)unwContext) || ((PDWORD)(unwContext + 1) <= pLoc))
+            *contextPointer = (PDWORD)saveLoc.u.addr;
+    }
+#endif
+}
+#endif
 
 static void GetContextPointers(unw_cursor_t *cursor, unw_context_t *unwContext, KNONVOLATILE_CONTEXT_POINTERS *contextPointers)
 {
@@ -121,6 +163,15 @@ static void GetContextPointers(unw_cursor_t *cursor, unw_context_t *unwContext, 
     GetContextPointer(cursor, unwContext, UNW_X86_64_R13, &contextPointers->R13);
     GetContextPointer(cursor, unwContext, UNW_X86_64_R14, &contextPointers->R14);
     GetContextPointer(cursor, unwContext, UNW_X86_64_R15, &contextPointers->R15);
+#elif defined(_ARM_)
+    GetContextPointer(cursor, unwContext, UNW_ARM_R4, &contextPointers->R4);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R5, &contextPointers->R5);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R6, &contextPointers->R6);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R7, &contextPointers->R7);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R8, &contextPointers->R8);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R9, &contextPointers->R9);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R10, &contextPointers->R10);
+    GetContextPointer(cursor, unwContext, UNW_ARM_R11, &contextPointers->R11);
 #else
 #error unsupported architecture
 #endif
@@ -226,6 +277,8 @@ static void RtlpRaiseException(EXCEPTION_RECORD *ExceptionRecord)
     ExceptionRecord->ExceptionAddress = (void *) ContextRecord.Eip;
 #elif defined(_AMD64_)
     ExceptionRecord->ExceptionAddress = (void *) ContextRecord.Rip;
+#elif defined(_ARM_)
+    ExceptionRecord->ExceptionAddress = (void *) ContextRecord.Pc;
 #else
 #error unsupported architecture
 #endif

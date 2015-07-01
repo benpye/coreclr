@@ -69,9 +69,9 @@ if(PAL_CMAKE_PLATFORM_ARCH_AMD64)
   )
 elseif(PAL_CMAKE_PLATFORM_ARCH_ARM)
   set(ARCH_SOURCES
-    #arch/arm/context.cpp
-    #arch/arm/context2.S
-    #arch/arm/processor.cpp
+    arch/arm/context.cpp
+    arch/arm/context2.S
+    arch/arm/processor.cpp
   )
 endif()
 
@@ -94,9 +94,9 @@ set(SOURCES
   cruntime/wchar.cpp
   cruntime/wchartls.cpp
   debug/debug.cpp
-  #exception/console.cpp
-  #exception/seh.cpp
-  #exception/signal.cpp
+  exception/console.cpp
+  exception/seh.cpp
+  exception/signal.cpp
   file/directory.cpp
   file/disk.cpp
   file/file.cpp
