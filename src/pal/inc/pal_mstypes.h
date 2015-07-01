@@ -563,23 +563,18 @@ typedef LONG_PTR SSIZE_T, *PSSIZE_T;
 #endif
 
 #ifndef PAL_STDCPP_COMPAT
+#if defined(__APPLE_CC__) || defined(__LINUX__)
 #ifdef BIT64
-#if defined(__APPLE_CC__) || defined(__LINUX__) 
 typedef unsigned long size_t;
 typedef long ptrdiff_t;
+#else // !BIT64
+typedef unsigned int size_t;
+typedef int ptrdiff_t;
+#endif // !BIT64
 #else
 typedef ULONG_PTR size_t;
 typedef LONG_PTR ptrdiff_t;
 #endif
-#else
-#if defined(__APPLE_CC__) || defined(__LINUX__) 
-typedef unsigned int size_t;
-typedef int ptrdiff_t;
-#else
-typedef UINT_PTR size_t;
-typedef INT_PTR ptrdiff_t;
-#endif
-#endif // !BIT64
 #endif // !PAL_STDCPP_COMPAT
 #define _SIZE_T_DEFINED
 
@@ -600,9 +595,14 @@ typedef char16_t WCHAR;
 #else // PAL_STDCPP_COMPAT
 
 typedef wchar_t WCHAR;
-#if defined(__LINUX__) 
+#if defined(__LINUX__)
+#ifdef BIT64
 typedef long int intptr_t;
 typedef unsigned long int uintptr_t;
+#else // !BIT64
+typedef int intptr_t;
+typedef unsigned int uintptr_t;
+#endif // !BIT64
 #else
 typedef INT_PTR intptr_t;
 typedef UINT_PTR uintptr_t;
