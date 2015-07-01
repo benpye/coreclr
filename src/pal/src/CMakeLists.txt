@@ -24,6 +24,12 @@ endif()
 
 # Compile options
 
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL AMD64)
+    set(PAL_CMAKE_PLATFORM_ARCH_AMD64 1)
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+    set(PAL_CMAKE_PLATFORM_ARCH_ARM 1)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
   add_definitions(-D_TARGET_MAC64)
   set(PLATFORM_SOURCES
@@ -43,16 +49,33 @@ add_definitions(-DLP64COMPATIBLE=1)
 add_definitions(-DFEATURE_PAL=1)
 add_definitions(-DCORECLR=1)
 add_definitions(-DPIC=1)
-add_definitions(-DBIT64=1)
-add_definitions(-D_WIN64=1)
+if(PAL_CMAKE_PLATFORM_ARCH_AMD64)
+  add_definitions(-DBIT64=1)
+  add_definitions(-D_WIN64=1)
+elseif(PAL_CMAKE_PLATFORM_ARCH_ARM)
+  add_definitions(-DBIT32=1)
+  add_definitions(-D_WIN32=1)
+endif()
+
 
 add_compile_options(-fno-builtin)
 add_compile_options(-fPIC)
 
+if(PAL_CMAKE_PLATFORM_ARCH_AMD64)
+  set(ARCH_SOURCES
+    arch/i386/context.cpp
+    arch/i386/context2.S
+    arch/i386/processor.cpp
+  )
+elseif(PAL_CMAKE_PLATFORM_ARCH_ARM)
+  set(ARCH_SOURCES
+    #arch/arm/context.cpp
+    #arch/arm/context2.S
+    #arch/arm/processor.cpp
+  )
+endif()
+
 set(SOURCES
-  arch/i386/context.cpp
-  arch/i386/context2.S
-  arch/i386/processor.cpp
   cruntime/file.cpp
   cruntime/filecrt.cpp
   cruntime/finite.cpp
@@ -160,6 +183,7 @@ set(SOURCES
 add_library(coreclrpal
   STATIC
   ${SOURCES}
+  ${ARCH_SOURCES}
   ${PLATFORM_SOURCES}
 )
 
