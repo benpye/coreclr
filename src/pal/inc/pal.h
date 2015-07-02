@@ -5694,11 +5694,11 @@ PALIMPORT double __cdecl _copysign(double, double);
 #ifdef __cplusplus
 extern "C++" {
 
-#if defined(BIT64) && !defined(PAL_STDCPP_COMPAT)
+#if !defined(PAL_STDCPP_COMPAT)
 inline __int64 abs(__int64 _X) {
     return llabs(_X);
 }
-#endif // defined(BIT64) && !defined(PAL_STDCPP_COMPAT)
+#endif // !defined(PAL_STDCPP_COMPAT)
 }
 #endif
 

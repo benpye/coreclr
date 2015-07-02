@@ -334,6 +334,9 @@ add_compile_options(-Wno-invalid-offsetof)
 # may not generate the same object layout as MSVC.
 add_compile_options(-Wno-incompatible-ms-struct)
 
+#This causes some issues in the JIT
+add_compile_options(-Wno-unused-value)
+
 # The -fms-extensions enable the stuff like __if_exists, __declspec(uuid()), etc.
 add_compile_options(-fms-extensions )
 #-fms-compatibility      Enable full Microsoft Visual C++ compatibility
