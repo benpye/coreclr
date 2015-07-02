@@ -12,7 +12,7 @@ if (IS_64BIT_BUILD EQUAL 1)
 endif (IS_64BIT_BUILD EQUAL 1)
 endif (WIN32)
 
-set( SOURCES
+set( JIT_SOURCES
   alloc.cpp
   bitset.cpp
   block.cpp
@@ -59,14 +59,34 @@ set( SOURCES
   loopcloning.cpp
   lower.cpp
   lsra.cpp
-  emitxarch.cpp
-  targetamd64.cpp
-  lowerxarch.cpp
-  codegenxarch.cpp
   simd.cpp
-  simdcodegenxarch.cpp
-  unwindamd64.cpp
 )
+
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL AMD64)
+  set( ARCH_SOURCES
+    targetamd64.cpp
+    unwindamd64.cpp
+    emitxarch.cpp
+    lowerxarch.cpp
+    codegenxarch.cpp
+    simdcodegenxarch.cpp
+  )
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+  set( ARCH_SOURCES
+    targetarm.cpp
+    unwindarm.cpp
+    emitarm.cpp
+    lowerarm.cpp
+    codegenarm.cpp
+  )
+else()
+  # IMPLEMENT THIS
+endif()
+
+set( SOURCES
+  ${JIT_SOURCES}
+  ${ARCH_SOURCES}
+ )
 
 convert_to_absolute_path(SOURCES ${SOURCES})
 
