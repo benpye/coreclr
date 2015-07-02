@@ -4,7 +4,10 @@ project(System.Security.Cryptography.Native)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_definitions(-DPIC=1)
-add_definitions(-DBIT64=1)
+
+if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+    add_definitions(-DBIT64=1)
+endif()
 
 find_library(CRYPTO NAMES crypto)
 if(CRYPTO STREQUAL CRYPTO-NOTFOUND)

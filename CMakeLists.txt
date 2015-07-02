@@ -186,9 +186,9 @@ endif(WIN32)
 if(CLR_CMAKE_PLATFORM_UNIX)
     #add_subdirectory(src/ToolBox/SOS/lldbplugin)
     add_subdirectory(src/pal)
-    #add_subdirectory(src/coreclr/hosts/unixcorerun)
-    #add_subdirectory(src/corefx)
-    #add_subdirectory(src/coreclr/hosts/unixcoreconsole)
+    add_subdirectory(src/coreclr/hosts/unixcorerun)
+    add_subdirectory(src/corefx)
+    add_subdirectory(src/coreclr/hosts/unixcoreconsole)
 endif(CLR_CMAKE_PLATFORM_UNIX)
 
 if(CLR_CMAKE_PLATFORM_DARWIN)
@@ -198,7 +198,7 @@ endif(CLR_CMAKE_PLATFORM_DARWIN)
 
 # Add this subdir. We install the headers for the jit.
 
-#add_subdirectory(src/pal/prebuilt/inc)
+add_subdirectory(src/pal/prebuilt/inc)
 
 # Set to 1 if you want to clear the CMAKE initial compiler flags and set all the flags explicitly
 # or to 0 if the CMake generated flags should be used
@@ -341,7 +341,7 @@ add_compile_options(-fms-extensions )
 
 endif(CLR_CMAKE_PLATFORM_UNIX)
 
-#add_subdirectory(src/debug/debug-pal)
+add_subdirectory(src/debug/debug-pal)
 
 # Include directory directives
 
