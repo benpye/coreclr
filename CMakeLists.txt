@@ -574,4 +574,4 @@ else ()
   endif ()
 endif (IS_64BIT_BUILD EQUAL 1)
 
-#add_subdirectory(src)
+add_subdirectory(src)

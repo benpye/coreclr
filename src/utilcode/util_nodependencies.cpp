@@ -211,6 +211,10 @@ CHECK_SUPPORTED:
 // Returns TRUE if we are running on a 64-bit OS in WoW, FALSE otherwise.
 BOOL RunningInWow64()
 {
+    #ifdef PLATFORM_UNIX
+    // TODO: Do we need to do anything else here?
+    return FALSE;
+    #else
     static int s_Wow64Process;
 
     if (s_Wow64Process == 0)
@@ -224,6 +228,7 @@ BOOL RunningInWow64()
     }
 
     return (s_Wow64Process == 1) ? TRUE : FALSE;
+    #endif
 }
 #endif
 

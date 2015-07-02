@@ -3,7 +3,14 @@ include_directories("strongname/inc")
 include_directories("inc/winrt")
 
 include_directories("debug/inc")
-include_directories("debug/inc/amd64")
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL AMD64)
+  include_directories("debug/inc/amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+  include_directories("debug/inc/arm")
+else()
+  # IMPLEMENT THIS
+endif()
+  
 include_directories("debug/inc/dump")
 include_directories("md/inc")
 include_directories("classlibnative/bcltype")
@@ -42,5 +49,5 @@ if(WIN32)
 endif(WIN32)
 
 if(CLR_CMAKE_PLATFORM_UNIX)
-    add_subdirectory(palrt)
+  add_subdirectory(palrt)
 endif(CLR_CMAKE_PLATFORM_UNIX)
