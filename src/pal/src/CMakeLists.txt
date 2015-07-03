@@ -189,12 +189,24 @@ add_library(coreclrpal
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-  target_link_libraries(coreclrpal
-    pthread
-    rt
-    dl
-    unwind
-  )
+  # On ARM linking with libunwind will break C++ exceptions unless we first
+  # link with gcc_s, this is a libunwind issue
+  if(PAL_CMAKE_PLATFORM_ARCH_ARM)
+    target_link_libraries(coreclrpal
+      gcc_s
+      pthread
+      rt
+      dl
+      unwind
+    )
+  else()
+    target_link_libraries(coreclrpal
+      pthread
+      rt
+      dl
+      unwind
+    )
+  endif()
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
 
 if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
