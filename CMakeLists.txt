@@ -22,6 +22,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
     elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
         set(CLR_CMAKE_PLATFORM_UNIX_TARGET_ARM 1)
         set(CLR_CMAKE_PLATFORM_ARCH_ARM 1)
+        # Because we don't use CMAKE_C_COMPILER/CMAKE_CXX_COMPILER to use clang
+        # we have to set the triple by adding a compiler argument
+        add_compile_options(-target armv7-linux-gnueabihf)
     endif()
     set(CLR_CMAKE_PLATFORM_LINUX 1)
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -577,4 +580,4 @@ else ()
   endif ()
 endif (IS_64BIT_BUILD EQUAL 1)
 
-add_subdirectory(src)
+#add_subdirectory(src)
