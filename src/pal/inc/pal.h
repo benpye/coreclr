@@ -94,7 +94,7 @@ extern "C" {
 #define _M_IA64 64100
 #elif defined(__x86_64__) && !defined(_M_AMD64)
 #define _M_AMD64 100
-#elif defined(__ARM_ARCH_7A__) && !defined(_M_ARM)
+#elif defined(__ARM_ARCH) && !defined(_M_ARM)
 #define _M_ARM 7
 #endif
 
@@ -3215,7 +3215,7 @@ PAL_GetLogicalCpuCountFromOS();
 #define PAL_CS_NATIVE_DATA_SIZE 120
 #elif defined(__LINUX__) && defined(__x86_64__)
 #define PAL_CS_NATIVE_DATA_SIZE 96
-#elif defined(__LINUX__) && defined(__ARM_ARCH_7A__)
+#elif defined(__LINUX__) && defined(__ARM__)
 #define PAL_CS_NATIVE_DATA_SIZE 80
 #else 
 #warning 
