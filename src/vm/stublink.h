@@ -75,7 +75,6 @@ struct IntermediateUnwindInfo;
 #define STUBLINKER_GENERATES_UNWIND_INFO
 #endif // !_TARGET_X86_ && !FEATURE_PAL
 
-
 #ifdef STUBLINKER_GENERATES_UNWIND_INFO
 
 typedef DPTR(struct StubUnwindInfoHeaderSuffix) PTR_StubUnwindInfoHeaderSuffix;
@@ -313,7 +312,7 @@ public:
                                             //   internals.
         BOOL          m_fDataOnly;          // the stub contains only data - does not need FlushInstructionCache
 
-#ifdef STUBLINKER_GENERATES_UNWIND_INFO 
+#if defined(STUBLINKER_GENERATES_UNWIND_INFO) || defined(_TARGET_ARM_)
 
 #ifdef _DEBUG
         CodeLabel     *m_pUnwindInfoCheckLabel;  // subfunction to call to unwind info check helper.

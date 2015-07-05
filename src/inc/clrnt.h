@@ -937,6 +937,14 @@ typedef struct _DISPATCHER_CONTEXT {
 
 #ifdef _TARGET_ARM_
 #include "daccess.h"
+
+//
+// Define unwind information flags.
+//
+
+#define UNW_FLAG_NHANDLER               0x0             /* any handler */
+#define UNW_FLAG_EHANDLER               0x1             /* filter handler */
+#define UNW_FLAG_UHANDLER               0x2             /* unwind handler */
                                                             
 // This function returns the length of a function using the new unwind info on arm.
 // Taken from minkernel\ntos\rtl\arm\ntrtlarm.h.
@@ -998,7 +1006,19 @@ RtlVirtualUnwind (
     __out PDWORD EstablisherFrame,
     __inout_opt PT_KNONVOLATILE_CONTEXT_POINTERS ContextPointers
     );
-#endif // !FEATURE_PAL
+#else
+PEXCEPTION_ROUTINE
+RtlVirtualUnwind (
+    IN DWORD HandlerType,
+    IN DWORD ImageBase,
+    IN DWORD ControlPc,
+    IN PRUNTIME_FUNCTION FunctionEntry,
+    IN OUT PT_CONTEXT ContextRecord,
+    OUT PVOID *HandlerData,
+    OUT PDWORD EstablisherFrame,
+    IN OUT PT_KNONVOLATILE_CONTEXT_POINTERS ContextPointers
+    );
+#endif
 
 #define UNW_FLAG_NHANDLER 0x0
 

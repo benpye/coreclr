@@ -3537,7 +3537,6 @@ VirtualProtect(
            IN DWORD flNewProtect,
            OUT PDWORD lpflOldProtect);
 
-#if defined(_AMD64_)
 typedef struct _MEMORYSTATUSEX {
   DWORD     dwLength;
   DWORD     dwMemoryLoad;
@@ -3555,8 +3554,6 @@ BOOL
 PALAPI
 GlobalMemoryStatusEx(
             IN OUT LPMEMORYSTATUSEX lpBuffer);
-
-#endif // _AMD64_
 
 typedef struct _MEMORY_BASIC_INFORMATION {
     PVOID BaseAddress;

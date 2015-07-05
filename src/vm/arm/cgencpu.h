@@ -15,6 +15,8 @@
 #include "utilcode.h"
 #include "tls.h"
 
+typedef BYTE byte;
+
 // preferred alignment for data
 #define DATA_ALIGNMENT 4
 
@@ -747,7 +749,7 @@ public:
         else 
         {
             _ASSERTE(reg1 != ThumbReg(15) && reg2 != ThumbReg(15));
-            Emit16((WORD)(0x4500 | reg2 << 3 | reg1 & 0x7 | (reg1 & 0x8 ? 0x80 : 0x0)));
+            Emit16((WORD)(0x4500 | reg2 << 3 | (reg1 & 0x7) | (reg1 & 0x8 ? 0x80 : 0x0)));
         }
     }
     
@@ -931,7 +933,7 @@ inline BOOL IsUnmanagedValueTypeReturnedByRef(UINT sizeofvaluetype)
     return (sizeofvaluetype > 4);
 }
 
-DECLSPEC_ALIGN(4) struct UMEntryThunkCode
+struct DECLSPEC_ALIGN(4) UMEntryThunkCode
 {
     WORD        m_code[4];
 
