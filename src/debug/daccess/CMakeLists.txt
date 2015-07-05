@@ -2,11 +2,20 @@
 include(${CLR_DIR}/dac.cmake)
 
 add_definitions(-DFEATURE_NO_HOST)
-add_definitions(-D_TARGET_AMD64_=1)
-add_definitions(-DDBG_TARGET_64BIT=1)
-add_definitions(-DDBG_TARGET_AMD64=1)
-add_definitions(-DDBG_TARGET_WIN64=1)
-add_definitions(-D_WIN64=1)
+
+if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
+  add_definitions(-D_TARGET_AMD64_=1)
+  add_definitions(-DDBG_TARGET_64BIT=1)
+  add_definitions(-DDBG_TARGET_AMD64=1)
+  add_definitions(-DDBG_TARGET_WIN64=1)
+  add_definitions(-D_WIN64=1)
+elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
+  add_definitions(-D_TARGET_ARM_=1)
+  add_definitions(-DDBG_TARGET_32BIT=1)
+  add_definitions(-DDBG_TARGET_ARM=1)
+  add_definitions(-DDBG_TARGET_WIN32=1)
+  add_definitions(-D_WIN32=1)
+endif()
 
 include_directories(BEFORE ${VM_DIR})
 include_directories(BEFORE ${VM_DIR}/${ARCH_SOURCES_DIR})
@@ -38,17 +47,19 @@ set(DACCESS_SOURCES
   datatargetadapter.cpp
 )
 
-if(IS_64BIT_BUILD EQUAL 1)
+if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
   include_directories(amd64)
 
   list(APPEND DACCESS_SOURCES
     amd64/primitives.cpp
   )
-else()
+elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
+  include_directories(arm)
+
   list(APPEND DACCESS_SOURCES
-    i386/primitives.cpp
+    arm/primitives.cpp
   )
-endif(IS_64BIT_BUILD EQUAL 1)
+endif()
 
 convert_to_absolute_path(DACCESS_SOURCES ${DACCESS_SOURCES})
 
