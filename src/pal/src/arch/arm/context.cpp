@@ -358,25 +358,7 @@ void CONTEXTToNativeContext(CONST CONTEXT *lpContext, native_context_t *native)
 
     if ((lpContext->ContextFlags & CONTEXT_FLOATING_POINT) == CONTEXT_FLOATING_POINT)
     {
-        /*FPREG_ControlWord(native) = lpContext->FltSave.ControlWord;
-        FPREG_StatusWord(native) = lpContext->FltSave.StatusWord;
-        FPREG_TagWord(native) = lpContext->FltSave.TagWord;
-        FPREG_ErrorOffset(native) = lpContext->FltSave.ErrorOffset;
-        FPREG_ErrorSelector(native) = lpContext->FltSave.ErrorSelector;
-        FPREG_DataOffset(native) = lpContext->FltSave.DataOffset;
-        FPREG_DataSelector(native) = lpContext->FltSave.DataSelector;
-        FPREG_MxCsr(native) = lpContext->FltSave.MxCsr;
-        FPREG_MxCsr_Mask(native) = lpContext->FltSave.MxCsr_Mask;
-
-        for (int i = 0; i < 8; i++)
-        {
-            FPREG_St(native, i) = lpContext->FltSave.FloatRegisters[i];
-        }
-
-        for (int i = 0; i < 16; i++)
-        {
-            FPREG_Xmm(native, i) = lpContext->FltSave.XmmRegisters[i];
-        }*/       
+        // TODO: Implement this     
     }
 }
 
@@ -413,28 +395,10 @@ void CONTEXTFromNativeContext(const native_context_t *native, LPCONTEXT lpContex
     }
 #undef ASSIGN_REG
     
-    /*if ((contextFlags & CONTEXT_FLOATING_POINT) == CONTEXT_FLOATING_POINT)
+    if ((contextFlags & CONTEXT_FLOATING_POINT) == CONTEXT_FLOATING_POINT)
     {
-        lpContext->FltSave.ControlWord = FPREG_ControlWord(native);
-        lpContext->FltSave.StatusWord = FPREG_StatusWord(native);
-        lpContext->FltSave.TagWord = FPREG_TagWord(native);
-        lpContext->FltSave.ErrorOffset = FPREG_ErrorOffset(native);
-        lpContext->FltSave.ErrorSelector = FPREG_ErrorSelector(native);
-        lpContext->FltSave.DataOffset = FPREG_DataOffset(native);
-        lpContext->FltSave.DataSelector = FPREG_DataSelector(native);
-        lpContext->FltSave.MxCsr = FPREG_MxCsr(native);
-        lpContext->FltSave.MxCsr_Mask = FPREG_MxCsr_Mask(native);
-
-        for (int i = 0; i < 8; i++)
-        {
-            lpContext->FltSave.FloatRegisters[i] = FPREG_St(native, i);
-        }
-
-        for (int i = 0; i < 16; i++)
-        {
-            lpContext->FltSave.XmmRegisters[i] = FPREG_Xmm(native, i);
-        }        
-    }*/
+        // TODO: Implement this     
+    }
 }
 
 /*++
@@ -726,33 +690,4 @@ DBG_FlushInstructionCache(
     __clear_cache((LPVOID)lpBaseAddress, (LPVOID)((INT_PTR)lpBaseAddress + dwSize));
     
     return TRUE;
-}
-
-VOID 
-PALAPI 
-RtlRestoreContext(
-  IN PCONTEXT ContextRecord,
-  IN PEXCEPTION_RECORD ExceptionRecord
-)
-{
-#if !HAVE_MACH_EXCEPTIONS
-#if HAVE_GETCONTEXT
-    native_context_t ucontext;
-    getcontext(&ucontext);
-#else
-#error Don't know how to get current context on this platform!
-#endif
-
-    CONTEXTToNativeContext(ContextRecord, &ucontext);
-
-#if HAVE_SETCONTEXT
-    setcontext(&ucontext);
-#else
-#error Don't know how to set current context on this platform!
-#endif
-
-#else
-    MachSetThreadContext(const_cast<CONTEXT *>(ContextRecord));
-    ASSERT("MachSetThreadContext should never return\n");
-#endif // HAVE_MACH_EXCEPTIONS
 }

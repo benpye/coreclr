@@ -38,57 +38,105 @@
 #define CONTEXT_Lr           CONTEXT_Sp+4
 #define CONTEXT_Pc           CONTEXT_Lr+4
 #define CONTEXT_Cpsr         CONTEXT_Pc+4
+#define CONTEXT_Fpscr        CONTEXT_Cpsr+4
+#define CONTEXT_Padding      CONTEXT_Fpscr+4
+#define CONTEXT_D0           CONTEXT_Padding+4
+#define CONTEXT_D1           CONTEXT_D0+8
+#define CONTEXT_D2           CONTEXT_D1+8
+#define CONTEXT_D3           CONTEXT_D2+8
+#define CONTEXT_D4           CONTEXT_D3+8
+#define CONTEXT_D5           CONTEXT_D4+8
+#define CONTEXT_D6           CONTEXT_D5+8
+#define CONTEXT_D7           CONTEXT_D6+8
+#define CONTEXT_D8           CONTEXT_D7+8
+#define CONTEXT_D9           CONTEXT_D8+8
+#define CONTEXT_D10          CONTEXT_D9+8
+#define CONTEXT_D11          CONTEXT_D10+8
+#define CONTEXT_D12          CONTEXT_D11+8
+#define CONTEXT_D13          CONTEXT_D12+8
+#define CONTEXT_D14          CONTEXT_D13+8
+#define CONTEXT_D15          CONTEXT_D14+8
+#define CONTEXT_D16          CONTEXT_D15+8
+#define CONTEXT_D17          CONTEXT_D16+8
+#define CONTEXT_D18          CONTEXT_D17+8
+#define CONTEXT_D19          CONTEXT_D18+8
+#define CONTEXT_D20          CONTEXT_D19+8
+#define CONTEXT_D21          CONTEXT_D20+8
+#define CONTEXT_D22          CONTEXT_D21+8
+#define CONTEXT_D23          CONTEXT_D22+8
+#define CONTEXT_D24          CONTEXT_D23+8
+#define CONTEXT_D25          CONTEXT_D24+8
+#define CONTEXT_D26          CONTEXT_D25+8
+#define CONTEXT_D27          CONTEXT_D26+8
+#define CONTEXT_D28          CONTEXT_D27+8
+#define CONTEXT_D29          CONTEXT_D28+8
+#define CONTEXT_D30          CONTEXT_D29+8
+#define CONTEXT_D31          CONTEXT_D30+8
 
 // Incoming:
-//  R0: Context*
+//  r0: Context*
 //
 LEAF_ENTRY CONTEXT_CaptureContext, _TEXT
     // Ensure we save these registers
-    push {R4-R11}
+    push {r4-r11}
     // Save processor flags before calling any of the following 'test' instructions
     // because they will modify state of some flags
-    push {R1}
-    mrs R1, APSR // Get APSR - equivalent to eflags
-    push {R1} // Save APSR
+    push {r1}
+    mrs r1, apsr // Get APSR - equivalent to eflags
+    push {r1} // Save APSR
     END_PROLOGUE
     
-    push {R2}
-    ldr R2, [R0, #(CONTEXT_ContextFlags)]
-    tst R2, #(CONTEXT_INTEGER)
-    pop {R2}
+    push {r2}
+    ldr r2, [R0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_INTEGER)
+    pop {r2}
     
     // Add 4 to stack so we point at R1, pop, then sub 8 to point at APSR
     add sp, sp, #4
-    pop {R1}
+    pop {r1}
     sub sp, sp, #8
     
-    strne R0, [R0, #(CONTEXT_R0)]
-    addne R0, CONTEXT_R1
-    stmiane R0, {R1-R12}
-    subne R0, CONTEXT_R1
+    strne r0, [r0, #(CONTEXT_R0)]
+    addne r0, CONTEXT_R1
+    stmiane r0, {r1-r12}
+    subne r0, CONTEXT_R1
     
-    ldr R2, [R0, #(CONTEXT_ContextFlags)]
-    tst R2, #(CONTEXT_CONTROL)
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_CONTROL)
     
     addne sp, sp, #(10*4) // This needs to put the stack in the same state as it started
-    strne sp, [R0, #(CONTEXT_Sp)]
+    strne sp, [r0, #(CONTEXT_Sp)]
     subne sp, sp, #(10*4)
     
-    strne lr, [R0, #(CONTEXT_Lr)]
-    strne lr, [R0, #(CONTEXT_Pc)]
+    strne lr, [r0, #(CONTEXT_Lr)]
+    strne lr, [r0, #(CONTEXT_Pc)]
     
     // Get the APSR pushed onto the stack at the start
-    pop {R1}
-    strne R1, [R0, #(CONTEXT_Cpsr)]
+    pop {r1}
+    strne r1, [r0, #(CONTEXT_Cpsr)]
+    
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_FLOATING_POINT)
+    
+    vmrsne r3, fpscr
+    strne r3, [r0, #(CONTEXT_Fpscr)]
+    
+    addne r0, CONTEXT_D0
+    vstmiane r0!, {d0-d15}
+    vstmiane r0!, {d16-d31}
+    subne r0, CONTEXT_D31
     
     // Make sure sp is restored
     add sp, sp, #4
 
     // Restore callee saved registers
-    pop {R4-R11}
+    pop {r4-r11}
     bx lr
 LEAF_END CONTEXT_CaptureContext, _TEXT
 
+// Incoming:
+//  R0: Context*
+//
 LEAF_ENTRY RtlCaptureContext, _TEXT
     push {r1}
     mov r1, #0
@@ -100,3 +148,56 @@ LEAF_ENTRY RtlCaptureContext, _TEXT
     pop {r1}
     b C_FUNC(CONTEXT_CaptureContext)
 LEAF_END RtlCaptureContext, _TEXT
+
+// Incoming:
+//  r0: Context*
+//  r1: Exception*
+//
+LEAF_ENTRY RtlRestoreContext, _TEXT
+    END_PROLOGUE
+    
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_FLOATING_POINT)
+    
+    addne r0, CONTEXT_D0
+    vldmiane r0!, {d0-d15}
+    vldmiane r0, {d16-d31}
+    subne r0, CONTEXT_D16
+    
+    ldrne r3, [r0, #(CONTEXT_Fpscr)]
+    vmrsne r3, FPSCR
+    
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_CONTROL)
+    
+    beq LOCAL_LABEL(No_Restore_CONTEXT_CONTROL)
+    
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_INTEGER)
+    
+    beq LOCAL_LABEL(No_Restore_CONTEXT_INTEGER)
+    
+    ldr R2, [r0, #(CONTEXT_Cpsr)]
+    msr APSR, r2    
+    
+    add r0, CONTEXT_R0
+    ldmia r0, {r0-r12, sp, lr, pc}
+    
+LOCAL_LABEL(No_Restore_CONTEXT_INTEGER):
+    
+    ldr r2, [r0, #(CONTEXT_Cpsr)]
+    msr APSR, r2    
+    
+    add r0, CONTEXT_Sp
+    ldmia r0, {sp, lr, pc}
+    
+LOCAL_LABEL(No_Restore_CONTEXT_CONTROL):
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
+    tst r2, #(CONTEXT_INTEGER)
+    
+    addne r0, CONTEXT_R0
+    ldmiane r0, {R0-R12}
+
+    sub sp, sp, #4
+    bx lr
+LEAF_END RtlRestoreContext, _TEXT
