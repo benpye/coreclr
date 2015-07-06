@@ -24,6 +24,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
         # Because we don't use CMAKE_C_COMPILER/CMAKE_CXX_COMPILER to use clang
         # we have to set the triple by adding a compiler argument
         add_compile_options(-target armv7-linux-gnueabihf)
+        add_compile_options(-mthumb)
+        add_compile_options(-mfpu=vfpv3)
     endif()
     set(CLR_CMAKE_PLATFORM_LINUX 1)
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
