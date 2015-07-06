@@ -37,7 +37,7 @@ LEAF_ENTRY JIT_MemSet, _TEXT
         subs    r2, r2, #4
         blt     ByteSet
 
-        ands    r1, r1, #&FF
+        ands    r1, r1, #0xFF
         orr     r1, r1, r1, lsl #8
 CheckAlign:                                             // 2-3 cycles
         ands    r3, r0, #3                              // Check alignment and fix if possible

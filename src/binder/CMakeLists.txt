@@ -1,6 +1,10 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-include_directories(BEFORE "../vm/amd64")
+if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
+    include_directories(BEFORE "../vm/amd64")
+elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
+    include_directories(BEFORE "../vm/arm")
+endif()
 include_directories(BEFORE "../vm")
 include_directories(BEFORE "inc")
       

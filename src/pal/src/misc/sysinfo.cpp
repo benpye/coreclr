@@ -195,7 +195,6 @@ GetSystemInfo(
     PERF_EXIT(GetSystemInfo);
 }
 
-#if defined(_AMD64_)
 /*++
 Function:
   GlobalMemoryStatusEx
@@ -324,5 +323,3 @@ PAL_GetLogicalCpuCountFromOS()
 
     return numLogicalCores;
 }
-
-#endif // defined(_AMD64_)

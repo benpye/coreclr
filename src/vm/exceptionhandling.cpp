@@ -4428,7 +4428,11 @@ VOID UnwindManagedExceptionPass2(EXCEPTION_RECORD* exceptionRecord, CONTEXT* unw
                 dispatcherContext.FunctionEntry,
                 callerFrameContext,
                 &handlerData,
+#ifdef _ARM_
+                (PULONG)&establisherFrame,
+#else
                 &establisherFrame,
+#endif
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries
@@ -4563,7 +4567,11 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
                 dispatcherContext.FunctionEntry,
                 &frameContext,
                 &handlerData,
+#ifdef _ARM_
+                (PULONG)&establisherFrame,
+#else
                 &establisherFrame,
+#endif
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries.
@@ -4586,7 +4594,11 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
             if (disposition == ExceptionContinueSearch)
             {
                 // Exception handler not found. Try the parent frame.
+#ifdef _ARM_
+                controlPc = frameContext.Pc;
+#else
                 controlPc = frameContext.Rip;
+#endif
             }
             else if (disposition == ExceptionStackUnwind)
             {

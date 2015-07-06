@@ -948,24 +948,11 @@ typedef struct _DISPATCHER_CONTEXT {
                                                             
 // This function returns the length of a function using the new unwind info on arm.
 // Taken from minkernel\ntos\rtl\arm\ntrtlarm.h.
-FORCEINLINE
 ULONG
 RtlpGetFunctionEndAddress (
     __in PRUNTIME_FUNCTION FunctionEntry,
     __in ULONG ImageBase
-    )
-{
-    ULONG FunctionLength;
-    
-    FunctionLength = FunctionEntry->UnwindData;
-    if ((FunctionLength & 3) != 0) {
-        FunctionLength = (FunctionLength >> 2) & 0x7ff;
-    } else {
-        FunctionLength = *(PTR_ULONG)(ImageBase + FunctionLength) & 0x3ffff;
-    }
-    
-    return FunctionEntry->BeginAddress + 2 * FunctionLength;
-}
+    );
 
 #define RUNTIME_FUNCTION__BeginAddress(FunctionEntry)               ThumbCodeToDataPointer<DWORD,DWORD>((FunctionEntry)->BeginAddress)
 #define RUNTIME_FUNCTION__SetBeginAddress(FunctionEntry,address)    ((FunctionEntry)->BeginAddress = DataPointerToThumbCode<DWORD,DWORD>(address))

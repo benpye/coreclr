@@ -1468,15 +1468,35 @@ BOOL DacUnwindStackFrame(T_CONTEXT *pContext, T_KNONVOLATILE_CONTEXT_POINTERS* p
     return res;
 }
 
+// This function returns the length of a function using the new unwind info on arm.
+// Taken from minkernel\ntos\rtl\arm\ntrtlarm.h.
+ULONG
+RtlpGetFunctionEndAddress (
+    __in PRUNTIME_FUNCTION FunctionEntry,
+    __in ULONG ImageBase
+    )
+{
+    ULONG FunctionLength;
+    
+    FunctionLength = FunctionEntry->UnwindData;
+    if ((FunctionLength & 3) != 0) {
+        FunctionLength = (FunctionLength >> 2) & 0x7ff;
+    } else {
+        FunctionLength = *(PTR_ULONG)(ImageBase + FunctionLength) & 0x3ffff;
+    }
+    
+    return FunctionEntry->BeginAddress + 2 * FunctionLength;
+}
+
 #if defined(FEATURE_PAL)
 PEXCEPTION_ROUTINE RtlVirtualUnwind(
     __in ULONG HandlerType,
-    __in ULONG64 ImageBase,
-    __in ULONG64 ControlPc,
+    __in ULONG ImageBase,
+    __in ULONG ControlPc,
     __in PRUNTIME_FUNCTION FunctionEntry,
     __in OUT PCONTEXT ContextRecord,
     __out PVOID *HandlerData,
-    __out PULONG64 EstablisherFrame,
+    __out PULONG EstablisherFrame,
     __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
     )
 {
@@ -1491,7 +1511,7 @@ PEXCEPTION_ROUTINE RtlVirtualUnwind(
         ImageBase,
         &armFunctionEntry,
         ContextRecord,
-        (PULONG)EstablisherFrame,
+        EstablisherFrame,
         &handlerRoutine,
         HandlerData,
         NULL

@@ -5,8 +5,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_definitions(-DPIC=1)
 
-if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
     add_definitions(-DBIT64=1)
+elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
+    add_definitions(-DBIT32=1)
 endif()
 
 find_library(CRYPTO NAMES crypto)

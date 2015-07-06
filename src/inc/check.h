@@ -401,9 +401,6 @@ CHECK CheckValue(TYPENAME &val)
 // returned from a Check routine.
 //--------------------------------------------------------------------------------
 
-#define CONSISTENCY_CHECK(_condition) \
-    CONSISTENCY_CHECK_MSG(_condition, "")
-
 #ifdef _DEBUG_IMPL
 
 #define CONSISTENCY_CHECK_MSG(_condition, _message) \
@@ -418,6 +415,9 @@ CHECK CheckValue(TYPENAME &val)
 #define CONSISTENCY_CHECK_MSGF(_condition, args) do { } while (0)
 
 #endif
+
+#define CONSISTENCY_CHECK(_condition) \
+    CONSISTENCY_CHECK_MSG(_condition, "")
 
 //--------------------------------------------------------------------------------
 // SIMPLIFYING_ASSUMPTIONS are workarounds which are placed in the code to allow progress

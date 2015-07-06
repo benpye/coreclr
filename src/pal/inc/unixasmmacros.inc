@@ -69,22 +69,6 @@ C_FUNC(\Name\()_End):
         LEAF_END_MARKED \Name, \Section
 .endm
 
-.macro PREPARE_EXTERNAL_VAR Name, HelperReg
-        mov \HelperReg, [rip + C_FUNC(\Name)@GOTPCREL]
-.endm
-
-.macro push_nonvol_reg Register
-        push \Register
-        .cfi_adjust_cfa_offset 8
-        .cfi_rel_offset \Register, 0
-.endm
-
-.macro pop_nonvol_reg Register
-        pop \Register
-        .cfi_adjust_cfa_offset -8
-        .cfi_restore \Register
-.endm
-
 .macro NESTED_ENTRY Name, Section, Handler
         LEAF_ENTRY \Name, \Section
         .ifnc \Handler, NoHandler
@@ -110,6 +94,23 @@ C_FUNC(\Name\()_End):
 .endm
 
 .macro END_PROLOGUE
+.endm
+
+#if _AMD64_
+.macro PREPARE_EXTERNAL_VAR Name, HelperReg
+        mov \HelperReg, [rip + C_FUNC(\Name)@GOTPCREL]
+.endm
+
+.macro push_nonvol_reg Register
+        push \Register
+        .cfi_adjust_cfa_offset 8
+        .cfi_rel_offset \Register, 0
+.endm
+
+.macro pop_nonvol_reg Register
+        pop \Register
+        .cfi_adjust_cfa_offset -8
+        .cfi_restore \Register
 .endm
 
 .macro alloc_stack Size
@@ -351,4 +352,160 @@ C_FUNC(\Name\()_End):
         POP_ARGUMENT_REGISTERS
         POP_CALLEE_SAVED_REGISTERS
 
+.endm
+
+#elif _ARM_
+.macro PREPARE_EXTERNAL_VAR Name, HelperReg
+        ldr \HelperReg, [pc, #C_FUNC(\Name)@GOTPCREL]
+.endm
+
+.macro push_nonvol_reg Register
+        push {\Register}
+        .cfi_adjust_cfa_offset 4
+        .cfi_rel_offset \Register, 0
+.endm
+
+.macro pop_nonvol_reg Register
+        pop {\Register}
+        .cfi_adjust_cfa_offset -4
+        .cfi_restore \Register
+.endm
+
+.macro alloc_stack Size
+        sub sp, sp, \Size
+        .cfi_adjust_cfa_offset \Size
+.endm
+
+.macro free_stack Size
+        add sp, sp, \Size
+        .cfi_adjust_cfa_offset -\Size
+.endm
+
+.macro set_cfa_register Reg, Offset
+        .cfi_def_cfa_register \Reg
+        .cfi_def_cfa_offset \Offset
+.endm
+
+.macro save_reg_postsp Reg, Offset
+        str \Reg, [sp, #\Offset]
+        .cfi_rel_offset \Reg, __Offset
+.endm
+
+.macro restore_reg Reg, Offset
+        ldr \Reg, [sp, #\Offset]
+        .cfi_restore \Reg
+.endm
+
+.macro POP_CALLEE_SAVED_REGISTERS
+        pop {r4-r11, lr}
+        .cfi_adjust_cfa_offset -(4*9)
+        .cfi_restore r4
+        .cfi_restore r5
+        .cfi_restore r6
+        .cfi_restore r7
+        .cfi_restore r8
+        .cfi_restore r9
+        .cfi_restore r10
+        .cfi_restore r11
+        .cfi_restore lr
+.endm
+
+.macro PUSH_CALLEE_SAVED_REGISTERS
+        push {r4-r11, lr}
+        .cfi_adjust_cfa_offset (4*9)
+.endm
+
+.macro push_register Reg
+        push            {\Reg}
+        .cfi_adjust_cfa_offset 4
+.endm
+
+.macro push_argument_register Reg
+        push_register \Reg
+.endm
+
+.macro PUSH_ARGUMENT_REGISTERS
+        push {r0-r3}
+        .cfi_adjust_cfa_offset (4*4)
+.endm
+
+.macro pop_register Reg
+        pop            {\Reg}
+        .cfi_adjust_cfa_offset -4
+.endm
+
+.macro pop_argument_register Reg
+        pop_register \Reg
+.endm
+
+.macro POP_ARGUMENT_REGISTERS
+        pop {r0-r3}
+        .cfi_adjust_cfa_offset -(4*4)
+.endm
+
+.macro PROLOG_WITH_TRANSITION_BLOCK extraLocals = 0, saveFpArgs = 0, pushArgRegs = 0
+
+        __PWTB_FloatArgumentRegisters = \extraLocals
+        __PWTB_SaveFPArgs = \saveFpArgs
+
+        .if (__PWTB_SaveFPArgs == 1)
+                .if ((__PWTB_FloatArgumentRegisters % 8) != 0)
+                __PWTB_FloatArgumentRegisters = __PWTB_FloatArgumentRegisters + 4
+                .endif
+                
+                __PWTB_TransitionBlock = __PWTB_FloatArgumentRegisters + 8 * 8 + 8 // 8 floating point registers
+        .else                
+                .if ((__PWTB_FloatArgumentRegisters % 8) == 0)
+                __PWTB_FloatArgumentRegisters = __PWTB_FloatArgumentRegisters + 4
+                .endif
+                
+                __PWTB_TransitionBlock = __PWTB_FloatArgumentRegisters
+        .endif
+
+        __PWTB_StackAlloc = __PWTB_TransitionBlock
+
+        .ifc \pushArgRegs, DoNotPushArgRegs
+                PUSH_ARGUMENT_REGISTERS
+        .endif
+
+        PUSH_CALLEE_SAVED_REGISTERS
+        
+        alloc_stack     __PWTB_StackAlloc
+        
+        .if (__PWTB_SaveFPArgs == 1)
+                add r6, sp, #(__PWTB_FloatArgumentRegisters)
+                vstm r6, {d0-d7}
+        .endif
+        
+        //CHECK_STACK_ALIGNMENT
+        
+        END_PROLOGUE
+
+.endm
+
+.macro EPILOG_WITH_TRANSITION_BLOCK_RETURN
+
+        free_stack __PWTB_StackAlloc
+        POP_CALLEE_SAVED_REGISTERS
+        free_stack 16
+        bx lr
+                
+.endm
+
+.macro EPILOG_WITH_TRANSITION_BLOCK_TAILCALL
+
+        .if (__PWTB_SaveFPArgs == 1)
+                add r6, sp, #(__PWTB_FloatArgumentRegisters)
+                vldm r6, {d0-d7}
+        .endif
+        
+        free_stack __PWTB_StackAlloc
+        POP_CALLEE_SAVED_REGISTERS
+        POP_ARGUMENT_REGISTERS        
+        
+.endm
+#endif
+
+.macro SETALIAS New, Old
+        .equiv \New, \Old
 .endm

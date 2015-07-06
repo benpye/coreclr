@@ -366,6 +366,9 @@ void ValidateWriteBarriers()
 }
 #endif // _DEBUG
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-token-paste"
+
 #define UPDATE_WB(_proc,_grow)   \
     CopyWriteBarrier((PCODE)JIT_WriteBarrier, (PCODE)JIT_WriteBarrier_##_proc##_##_grow##, (PCODE)JIT_WriteBarrier_##_proc##_##_grow##_End); \
     wbMapping[WriteBarrierIndex].from = (PBYTE)JIT_WriteBarrier_##_proc##_##_grow##; \
@@ -455,6 +458,7 @@ void UpdateGCWriteBarriers(BOOL postGrow = false)
     ComputeWriteBarrierRange(&pbAlteredRange, &cbAlteredRange);
     FlushInstructionCache(GetCurrentProcess(), pbAlteredRange, cbAlteredRange);
 }
+#pragma clang diagnostic pop
 
 void StompWriteBarrierResize(BOOL bReqUpperBoundsCheck)
 {
@@ -1379,7 +1383,12 @@ Stub *GenerateInitPInvokeFrameHelper()
     ThumbReg regThread  = ThumbReg(5);
     ThumbReg regScratch = ThumbReg(6);
 
+#ifdef FEATURE_IMPLICIT_TLS
+    TLSACCESSMODE mode = TLSACCESS_GENERIC;
+#else
     TLSACCESSMODE mode = GetTLSAccessMode(GetThreadTLSIndex());
+#endif
+
 
     if (mode == TLSACCESS_GENERIC)
     {
@@ -1453,6 +1462,7 @@ Stub *GenerateInitPInvokeFrameHelper()
 
 void StubLinkerCPU::ThumbEmitGetThread(TLSACCESSMODE mode, ThumbReg dest)
 {
+#ifndef FEATURE_IMPLICIT_TLS
     DWORD idxThread = GetThreadTLSIndex();
 
     if (mode != TLSACCESS_GENERIC)
@@ -1478,6 +1488,9 @@ void StubLinkerCPU::ThumbEmitGetThread(TLSACCESSMODE mode, ThumbReg dest)
         }
     }
     else
+#else
+    DWORD idxThread = 0;
+#endif
     {
         ThumbEmitMovConstant(ThumbReg(0), idxThread);
 
@@ -2550,7 +2563,7 @@ static const LPVOID InlineGetAppDomainLocations[] = {
     (PVOID)JIT_GetSharedGCStaticBaseNoCtor__PatchTLSLabel
 };
 
-
+#ifndef FEATURE_IMPLICIT_TLS
 void FixupInlineGetters(DWORD tlsSlot, const LPVOID * pLocations, int nLocations)
 {
     STANDARD_VM_CONTRACT;
@@ -2576,12 +2589,14 @@ void FixupInlineGetters(DWORD tlsSlot, const LPVOID * pLocations, int nLocations
         *((WORD*)(pInlineGetter + 6)) |= (WORD)offset;
     }
 }
+#endif
 
-
-
+#if 0
 void InitJITHelpers1()
 {
     STANDARD_VM_CONTRACT;
+    
+#ifndef FEATURE_IMPLICIT_TLS
 
     if (gThreadTLSIndex < TLS_MINIMUM_AVAILABLE)
     {
@@ -2654,7 +2669,9 @@ void InitJITHelpers1()
         SetJitHelperFunction(CORINFO_HELP_GETSHARED_GCSTATIC_BASE_NOCTOR,   JIT_GetSharedGCStaticBaseNoCtor_Portable);
         SetJitHelperFunction(CORINFO_HELP_GETSHARED_NONGCSTATIC_BASE_NOCTOR,JIT_GetSharedNonGCStaticBaseNoCtor_Portable);
     }
+#endif
 }
+#endif
 
 extern "C" Object *SetAppDomainInObject(Object *pObject)
 {
@@ -2998,7 +3015,11 @@ void StubLinkerCPU::EmitStubLinkFrame(TADDR pFrameVptr, int offsetOfFrame, int o
     //  str r6, [r4 + #offsetof(MulticastFrame, m_Next)]
     //  str r4, [r5 + #offsetof(Thread, m_pFrame)]
 
+#ifdef FEATURE_IMPLICIT_TLS
+    TLSACCESSMODE mode = TLSACCESS_GENERIC;
+#else
     TLSACCESSMODE mode = GetTLSAccessMode(GetThreadTLSIndex());
+#endif
     ThumbEmitGetThread(mode, ThumbReg(5));
     if (mode == TLSACCESS_GENERIC)
     {

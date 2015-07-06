@@ -2442,10 +2442,14 @@ size_t GetLargestOnDieCacheSize(BOOL bTrueSize)
     else
         return maxSize;
 
-#else
+#elif !defined(FEATURE_PAL)
 
     size_t cache_size = GetLogicalProcessorCacheSizeFromOS() ; // Returns the size of the highest level processor cache
     return cache_size;
+    
+#else
+    // TODO: This should be implemented in PAL
+    return 0;
 
 #endif
 }

@@ -172,8 +172,8 @@ FindStubFunctionEntry (
                     RUNTIME_FUNCTION__BeginAddress(pCurFunction),
                     RUNTIME_FUNCTION__EndAddress(pCurFunction, (TADDR)pStubHeapSegment->pbBaseAddress)));
 
-            CONSISTENCY_CHECK(RUNTIME_FUNCTION__EndAddress(pCurFunction, (TADDR)pStubHeapSegment->pbBaseAddress) > RUNTIME_FUNCTION__BeginAddress(pCurFunction));
-            CONSISTENCY_CHECK(!pPrevFunction || RUNTIME_FUNCTION__EndAddress(pPrevFunction, (TADDR)pStubHeapSegment->pbBaseAddress) <= RUNTIME_FUNCTION__BeginAddress(pCurFunction));
+            CONSISTENCY_CHECK((RUNTIME_FUNCTION__EndAddress(pCurFunction, (TADDR)pStubHeapSegment->pbBaseAddress) > RUNTIME_FUNCTION__BeginAddress(pCurFunction)));
+            CONSISTENCY_CHECK((!pPrevFunction || RUNTIME_FUNCTION__EndAddress(pPrevFunction, (TADDR)pStubHeapSegment->pbBaseAddress) <= RUNTIME_FUNCTION__BeginAddress(pCurFunction)));
 
             // The entry points are in increasing address order.  They're
             // also contiguous, so after we're sure it's after the start of
@@ -181,7 +181,7 @@ FindStubFunctionEntry (
             // the end address.
             if (RelativeAddress < RUNTIME_FUNCTION__EndAddress(pCurFunction, (TADDR)pStubHeapSegment->pbBaseAddress))
             {
-                CONSISTENCY_CHECK(RelativeAddress >= RUNTIME_FUNCTION__BeginAddress(pCurFunction));
+                CONSISTENCY_CHECK((RelativeAddress >= RUNTIME_FUNCTION__BeginAddress(pCurFunction)));
 
                 return pCurFunction;
             }
@@ -215,7 +215,7 @@ void UnregisterUnwindInfoInLoaderHeapCallback (PVOID pvAllocationBase, SIZE_T cb
 
     StubUnwindInfoHeapSegment *pStubHeapSegment;
     for (StubUnwindInfoHeapSegment **ppPrevStubHeapSegment = &g_StubHeapSegments;
-            pStubHeapSegment = *ppPrevStubHeapSegment; )
+            (pStubHeapSegment = *ppPrevStubHeapSegment); )
     {
         LOG((LF_STUBS, LL_INFO10000, "    have unwind info for address %p size %p\n", pStubHeapSegment->pbBaseAddress, pStubHeapSegment->cbSegment));
 
@@ -354,7 +354,7 @@ StubLinker::StubLinker()
     m_pPatchLabel       = NULL;
     m_stackSize         = 0;
     m_fDataOnly         = FALSE;
-#ifdef STUBLINKER_GENERATES_UNWIND_INFO
+#if STUBLINKER_GENERATES_UNWIND_INFO
 #ifdef _DEBUG
     m_pUnwindInfoCheckLabel = NULL;
 #endif
@@ -1327,7 +1327,11 @@ bool StubLinker::EmitUnwindInfo(Stub* pStub, int globalsize)
         COMPlusThrowOM();
     }
 
+#ifndef FEATURE_PAL
     BYTE *pbRegionBaseAddress = (BYTE*)mbi.AllocationBase;
+#else
+    BYTE *pbRegionBaseAddress = (BYTE*)mbi.BaseAddress;
+#endif
 
 #ifdef _DEBUG
     static SIZE_T MaxSegmentSize = -1;
@@ -1824,8 +1828,13 @@ bool StubLinker::EmitUnwindInfo(Stub* pStub, int globalsize)
             if (mbi.State & MEM_FREE)
                 break;
 
+#ifndef FEATURE_PAL
             if (pbRegionBaseAddress != mbi.AllocationBase)
                 break;
+#else
+            if (pbRegionBaseAddress != mbi.BaseAddress)
+                break;
+#endif
 
             pbCurrentBase += mbi.RegionSize;
         }

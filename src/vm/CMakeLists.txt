@@ -352,6 +352,11 @@ else()
         )
     elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
         set(VM_SOURCES_WKS_ARCH_ASM
+            ${ARM_SOURCES_DIR}/asmhelpers.S
+            ${ARM_SOURCES_DIR}/crthelpers.S
+            ${ARM_SOURCES_DIR}/ehhelpers.S
+            ${ARM_SOURCES_DIR}/memcpy.S
+            ${ARM_SOURCES_DIR}/patchedcode.S
         )
     endif()
     
@@ -367,7 +372,6 @@ if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
     )
     
     set(VM_SOURCES_WKS_ARCH
-    #The following files need to be ported to Linux
         ${AMD64_SOURCES_DIR}/jithelpersamd64.cpp
         ${AMD64_SOURCES_DIR}/jitinterfaceamd64.cpp
         ${AMD64_SOURCES_DIR}/profiler.cpp
@@ -385,10 +389,10 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
     set(VM_SOURCES_DAC_AND_WKS_ARCH
         ${ARM_SOURCES_DIR}/exceparm.cpp
         ${ARM_SOURCES_DIR}/stubs.cpp
+        ${ARM_SOURCES_DIR}/armsinglestepper.cpp
     )
     
     set(VM_SOURCES_WKS_ARCH
-    #The following files need to be ported to Linux
         ${ARM_SOURCES_DIR}/jithelpersarm.cpp
         ${ARM_SOURCES_DIR}/profiler.cpp
         jitinterfacegen.cpp
@@ -397,6 +401,7 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
     if(CLR_CMAKE_PLATFORM_UNIX)
     
     list(APPEND VM_SOURCES_WKS_ARCH
+        ${ARM_SOURCES_DIR}/unixstubs.cpp
     )
     
     endif(CLR_CMAKE_PLATFORM_UNIX)

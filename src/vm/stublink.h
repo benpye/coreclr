@@ -312,7 +312,7 @@ public:
                                             //   internals.
         BOOL          m_fDataOnly;          // the stub contains only data - does not need FlushInstructionCache
 
-#if defined(STUBLINKER_GENERATES_UNWIND_INFO) || defined(_TARGET_ARM_)
+#if defined(STUBLINKER_GENERATES_UNWIND_INFO)
 
 #ifdef _DEBUG
         CodeLabel     *m_pUnwindInfoCheckLabel;  // subfunction to call to unwind info check helper.

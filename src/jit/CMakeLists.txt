@@ -78,7 +78,10 @@ elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
     emitarm.cpp
     lowerarm.cpp
     codegenarm.cpp
+    codegenlegacy.cpp
+    registerfp.cpp
   )
+  add_definitions(-DLEGACY_BACKEND) 
 else()
   # IMPLEMENT THIS
 endif()
