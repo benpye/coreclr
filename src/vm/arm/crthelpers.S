@@ -30,7 +30,7 @@ LEAF_ENTRY JIT_MemSet, _TEXT
         cmp r0, #0
         beq Exit_MemSet
         
-        bx C_PLTFUNC(memset)
+        b C_PLTFUNC(memset)
         
 EXIT_MemSet:
         bx lr
@@ -47,7 +47,7 @@ LEAF_ENTRY JIT_MemCpy, _TEXT
         cmp r0, #0
         beq Exit_MemCpy
         
-        bx C_PLTFUNC(memcpy)
+        b C_PLTFUNC(memcpy)
         
 EXIT_MemCpy:
         bx lr

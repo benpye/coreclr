@@ -1480,10 +1480,8 @@ PEXCEPTION_ROUTINE RtlVirtualUnwind(
     __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
     )
 {
-    PEXCEPTION_ROUTINE handlerRoutine;
-    
     PORTABILITY_ASSERT("Implement for PAL");
     
-    return handlerRoutine;
+    return NULL;
 }
 #endif

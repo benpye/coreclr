@@ -4636,7 +4636,7 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
                 // Pop all frames that are below the block of native frames and that would be
                 // in the unwound part of the stack when UnwindManagedExceptionPass1 is resumed 
                 // at the next managed frame.
-                UnwindFrameChain(GetThread(), GetSP(&((VOID*)frameContext));
+                UnwindFrameChain(GetThread(), (VOID*)GetSP(&frameContext));
 
                 // We are going to reclaim the stack range that was scanned by the exception tracker
                 // until now. We need to reset the explicit frames range so that if GC fires before

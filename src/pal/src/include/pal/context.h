@@ -242,6 +242,7 @@ typedef ucontext_t native_context_t;
 #define PTREG_Esp(ptreg)    ((ptreg).esp)
 #else
 #error "Unsupported arch"
+#endif
 
 #endif // BIT64
 
