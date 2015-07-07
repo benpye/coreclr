@@ -96,7 +96,7 @@ C_FUNC(\Name\()_End):
 .macro END_PROLOGUE
 .endm
 
-#if _AMD64_
+#if defined(_AMD64_)
 .macro PREPARE_EXTERNAL_VAR Name, HelperReg
         mov \HelperReg, [rip + C_FUNC(\Name)@GOTPCREL]
 .endm
@@ -354,7 +354,7 @@ C_FUNC(\Name\()_End):
 
 .endm
 
-#elif _ARM_
+#elif defined(_ARM_)
 .macro PREPARE_EXTERNAL_VAR Name, HelperReg
         ldr \HelperReg, [pc, #C_FUNC(\Name)@GOTPCREL]
 .endm

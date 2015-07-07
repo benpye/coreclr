@@ -354,7 +354,7 @@ StubLinker::StubLinker()
     m_pPatchLabel       = NULL;
     m_stackSize         = 0;
     m_fDataOnly         = FALSE;
-#if STUBLINKER_GENERATES_UNWIND_INFO
+#ifdef STUBLINKER_GENERATES_UNWIND_INFO
 #ifdef _DEBUG
     m_pUnwindInfoCheckLabel = NULL;
 #endif
