@@ -1,4 +1,4 @@
-#add_subdirectory(crossgen)
+add_subdirectory(crossgen)
 
 if(WIN32)
   add_subdirectory(GenClrDebugResource)
