@@ -2591,7 +2591,6 @@ void FixupInlineGetters(DWORD tlsSlot, const LPVOID * pLocations, int nLocations
 }
 #endif
 
-#if 0
 void InitJITHelpers1()
 {
     STANDARD_VM_CONTRACT;
@@ -2671,7 +2670,6 @@ void InitJITHelpers1()
     }
 #endif
 }
-#endif
 
 extern "C" Object *SetAppDomainInObject(Object *pObject)
 {

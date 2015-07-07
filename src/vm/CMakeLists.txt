@@ -395,7 +395,6 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
     set(VM_SOURCES_WKS_ARCH
         ${ARM_SOURCES_DIR}/jithelpersarm.cpp
         ${ARM_SOURCES_DIR}/profiler.cpp
-        jitinterfacegen.cpp
     )
     
     if(CLR_CMAKE_PLATFORM_UNIX)

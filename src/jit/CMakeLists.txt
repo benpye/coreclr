@@ -62,7 +62,7 @@ set( JIT_SOURCES
   simd.cpp
 )
 
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL AMD64)
+if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
   set( ARCH_SOURCES
     targetamd64.cpp
     unwindamd64.cpp
@@ -71,7 +71,7 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd
     codegenxarch.cpp
     simdcodegenxarch.cpp
   )
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   set( ARCH_SOURCES
     targetarm.cpp
     unwindarm.cpp
