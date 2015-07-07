@@ -311,7 +311,7 @@ list(APPEND VM_SOURCES_DAC
 )
 
 # AMD64 specific asm sources
-set(VM_SOURCES_WKS_AMD64_ASM
+set(VM_SOURCES_WKS_ARCH_ASM
     ${AMD64_SOURCES_DIR}/AsmHelpers.asm
     ${AMD64_SOURCES_DIR}/CallDescrWorkerAMD64.asm
     ${AMD64_SOURCES_DIR}/ComCallPreStub.asm
