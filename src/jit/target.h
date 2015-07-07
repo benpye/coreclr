@@ -40,10 +40,6 @@
 /*****************************************************************************/
 
 #if defined(_TARGET_ARM_)
-// TODO: This is a hack, what's the correct solution?
-#ifdef __int64
-#undef __int64
-#endif
 DECLARE_TYPED_ENUM(_regNumber_enum, unsigned)
 {
     #define REGDEF(name, rnum, mask, sname)  REG_##name = rnum,
