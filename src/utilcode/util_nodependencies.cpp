@@ -212,7 +212,6 @@ CHECK_SUPPORTED:
 BOOL RunningInWow64()
 {
     #ifdef PLATFORM_UNIX
-    // TODO: Do we need to do anything else here?
     return FALSE;
     #else
     static int s_Wow64Process;

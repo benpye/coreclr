@@ -7,18 +7,20 @@ include_directories(${CLR_DIR}/src/gc)
 include_directories(${CLR_DIR}/src/gcdump)
 include_directories(${CLR_DIR}/src/debug/daccess)
 
+set(UNWINDER_SOURCES
+    unwinder.cpp
+)
+
 if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
     include_directories(amd64)
     
-    set(UNWINDER_SOURCES
-        unwinder.cpp
+    list(APPEND UNWINDER_SOURCES
         amd64/unwinder_amd64.cpp
     )
 elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
     include_directories(arm)
     
-    set(UNWINDER_SOURCES
-        unwinder.cpp
+    list(APPEND UNWINDER_SOURCES
         arm/unwinder_arm.cpp
     )
 else()

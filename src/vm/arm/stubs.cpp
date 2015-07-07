@@ -2228,7 +2228,7 @@ void UpdateRegDisplayFromCalleeSavedRegisters(REGDISPLAY * pRD, CalleeSavedRegis
     pRD->pCurrentContextPointers->Lr = NULL;
 }
 
-
+#ifndef CROSSGEN_COMPILE
 void TransitionFrame::UpdateRegDisplay(const PREGDISPLAY pRD) 
 { 
     pRD->IsCallerContextValid = FALSE;
@@ -2298,6 +2298,7 @@ void TailCallFrame::InitFromContext(T_CONTEXT * pContext)
 }
 
 #endif // !DACCESS_COMPILE
+#endif // !CROSSGEN_COMPILE
 
 void FaultingExceptionFrame::UpdateRegDisplay(const PREGDISPLAY pRD) 
 { 

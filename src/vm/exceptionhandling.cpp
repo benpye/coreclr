@@ -4424,11 +4424,7 @@ VOID UnwindManagedExceptionPass2(EXCEPTION_RECORD* exceptionRecord, CONTEXT* unw
                 dispatcherContext.FunctionEntry,
                 callerFrameContext,
                 &handlerData,
-#ifdef _WIN32
-                (PULONG)&establisherFrame,
-#else
-                &establisherFrame,
-#endif
+                (SIZE_T*)&establisherFrame,
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries
@@ -4551,11 +4547,7 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
                 dispatcherContext.FunctionEntry,
                 &frameContext,
                 &handlerData,
-#ifdef _WIN32
-                (PULONG)&establisherFrame,
-#else
-                &establisherFrame,
-#endif
+                (SIZE_T*)&establisherFrame,
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries.
@@ -4652,7 +4644,7 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
             UNREACHABLE();
         }
 
-    } while (IsSpInStackLimits(GetIP(&frameContext), stackLowAddress, stackHighAddress));
+    } while (IsSpInStackLimits(GetSP(&frameContext), stackLowAddress, stackHighAddress));
 
     _ASSERTE(!"UnwindManagedExceptionPass1: Failed to find a handler. Reached the end of the stack");
     EEPOLICY_HANDLE_FATAL_ERROR(COR_E_EXECUTIONENGINE);

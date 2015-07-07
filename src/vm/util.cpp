@@ -2448,8 +2448,7 @@ size_t GetLargestOnDieCacheSize(BOOL bTrueSize)
     return cache_size;
     
 #else
-    PORTABILITY_ASSERT("Implement for PAL");
-    
+    // No good way to get this but it's not essential
     return 0;
 
 #endif

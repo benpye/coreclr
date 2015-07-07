@@ -9,7 +9,7 @@
 //
 // ==--==
 // ***********************************************************************
-// File: CrtHelpers.asm
+// File: crthelpers.S
 //
 // ***********************************************************************
 
@@ -28,12 +28,9 @@
 LEAF_ENTRY JIT_MemSet, _TEXT
 
         cmp r0, #0
-        beq Exit_MemSet
+        bxeq lr
         
         b C_PLTFUNC(memset)
-        
-EXIT_MemSet:
-        bx lr
 
 LEAF_END_MARKED JIT_MemSet, _TEXT
 
@@ -45,12 +42,9 @@ LEAF_ENTRY JIT_MemCpy, _TEXT
 // and doesn't return a value
 
         cmp r0, #0
-        beq Exit_MemCpy
+        bxeq lr
         
         b C_PLTFUNC(memcpy)
-        
-EXIT_MemCpy:
-        bx lr
 
 LEAF_END_MARKED JIT_MemCpy, _TEXT
 
