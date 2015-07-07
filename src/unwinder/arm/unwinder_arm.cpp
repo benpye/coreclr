@@ -1481,24 +1481,9 @@ PEXCEPTION_ROUTINE RtlVirtualUnwind(
     )
 {
     PEXCEPTION_ROUTINE handlerRoutine;
-    IMAGE_ARM_RUNTIME_FUNCTION_ENTRY armFunctionEntry;
-    armFunctionEntry.BeginAddress = FunctionEntry->BeginAddress;
-    armFunctionEntry.UnwindData = FunctionEntry->UnwindData;
-
-    // Is this even remotely correct?
-    HRESULT res = RtlpUnwindFunctionFull(
-        ControlPc,
-        ImageBase,
-        &armFunctionEntry,
-        ContextRecord,
-        EstablisherFrame,
-        &handlerRoutine,
-        HandlerData,
-        NULL
-    );
-
-    _ASSERTE(SUCCEEDED(res));
-
+    
+    PORTABILITY_ASSERT("Implement for PAL");
+    
     return handlerRoutine;
 }
 #endif

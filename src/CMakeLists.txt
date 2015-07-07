@@ -3,12 +3,12 @@ include_directories("strongname/inc")
 include_directories("inc/winrt")
 
 include_directories("debug/inc")
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL AMD64)
+if(CLR_CMAKE_PLATFORM_UNIX_TARGET_AMD64)
   include_directories("debug/inc/amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
+elseif(CLR_CMAKE_PLATFORM_UNIX_TARGET_ARM)
   include_directories("debug/inc/arm")
 else()
-  # IMPLEMENT THIS
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
   
 include_directories("debug/inc/dump")
@@ -49,5 +49,5 @@ if(WIN32)
 endif(WIN32)
 
 if(CLR_CMAKE_PLATFORM_UNIX)
-  add_subdirectory(palrt)
+    add_subdirectory(palrt)
 endif(CLR_CMAKE_PLATFORM_UNIX)

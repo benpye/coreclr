@@ -75,6 +75,7 @@ static void WinContextToUnwindCursor(CONTEXT *winContext, unw_cursor_t *cursor)
 #elif defined(_ARM_)
     unw_set_reg(cursor, UNW_REG_IP, winContext->Pc);
     unw_set_reg(cursor, UNW_REG_SP, winContext->Sp);
+    unw_set_reg(cursor, UNW_ARM_R14, winContext->Lr);
     unw_set_reg(cursor, UNW_ARM_R4, winContext->R4);
     unw_set_reg(cursor, UNW_ARM_R5, winContext->R5);
     unw_set_reg(cursor, UNW_ARM_R6, winContext->R6);
@@ -83,8 +84,6 @@ static void WinContextToUnwindCursor(CONTEXT *winContext, unw_cursor_t *cursor)
     unw_set_reg(cursor, UNW_ARM_R9, winContext->R9);
     unw_set_reg(cursor, UNW_ARM_R10, winContext->R10);
     unw_set_reg(cursor, UNW_ARM_R11, winContext->R11);
-    //unw_set_reg(cursor, UNW_ARM_R12, winContext->R12);
-    unw_set_reg(cursor, UNW_ARM_R14, winContext->Lr);
 #endif
 }
 #endif
@@ -103,6 +102,7 @@ static void UnwindContextToWinContext(unw_cursor_t *cursor, CONTEXT *winContext)
 #elif defined(_ARM_)
     unw_get_reg(cursor, UNW_REG_IP, (unw_word_t *) &winContext->Pc);
     unw_get_reg(cursor, UNW_REG_SP, (unw_word_t *) &winContext->Sp);
+    unw_get_reg(cursor, UNW_ARM_R14, (unw_word_t *) &winContext->Lr);
     unw_get_reg(cursor, UNW_ARM_R4, (unw_word_t *) &winContext->R4);
     unw_get_reg(cursor, UNW_ARM_R5, (unw_word_t *) &winContext->R5);
     unw_get_reg(cursor, UNW_ARM_R6, (unw_word_t *) &winContext->R6);
@@ -111,8 +111,6 @@ static void UnwindContextToWinContext(unw_cursor_t *cursor, CONTEXT *winContext)
     unw_get_reg(cursor, UNW_ARM_R9, (unw_word_t *) &winContext->R9);
     unw_get_reg(cursor, UNW_ARM_R10, (unw_word_t *) &winContext->R10);
     unw_get_reg(cursor, UNW_ARM_R11, (unw_word_t *) &winContext->R11);
-    //unw_get_reg(cursor, UNW_ARM_R12, (unw_word_t *) &winContext->R12);
-    unw_get_reg(cursor, UNW_ARM_R14, (unw_word_t *) &winContext->Lr);
 #else
 #error unsupported architecture
 #endif
@@ -139,10 +137,6 @@ static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, i
 #else
 static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, PDWORD *contextPointer)
 {
-#if defined(__APPLE__)
-    // Returning NULL indicates that we don't have context pointers available
-    *contextPointer = NULL;
-#else
     unw_save_loc_t saveLoc;
     unw_get_save_loc(cursor, reg, &saveLoc);
     if (saveLoc.type == UNW_SLT_MEMORY)
@@ -152,7 +146,6 @@ static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, i
         if ((pLoc < (PDWORD)unwContext) || ((PDWORD)(unwContext + 1) <= pLoc))
             *contextPointer = (PDWORD)saveLoc.u.addr;
     }
-#endif
 }
 #endif
 

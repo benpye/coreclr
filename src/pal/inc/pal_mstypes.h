@@ -595,7 +595,7 @@ typedef char16_t WCHAR;
 #else // PAL_STDCPP_COMPAT
 
 typedef wchar_t WCHAR;
-#if defined(__LINUX__)
+#if defined(__LINUX__) 
 #ifdef BIT64
 typedef long int intptr_t;
 typedef unsigned long int uintptr_t;

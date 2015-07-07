@@ -22,6 +22,8 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
     add_definitions(-DDBG_TARGET_ARM=1)
     add_definitions(-DDBG_TARGET_WIN32=1)
     include_directories(${ARM_SOURCES_DIR})
+else()
+    message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 add_definitions(-DFEATURE_LEAVE_RUNTIME_HOLDER=1)

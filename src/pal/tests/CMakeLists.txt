@@ -19,6 +19,8 @@ if(PAL_CMAKE_PLATFORM_ARCH_AMD64)
 elseif(PAL_CMAKE_PLATFORM_ARCH_ARM)
   add_definitions(-DBIT32=1)
   add_definitions(-D_WIN32=1)
+else()
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 add_compile_options(-Wno-empty-body)

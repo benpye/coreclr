@@ -1653,7 +1653,7 @@ __ProfilerHelperFunc SETS "$HelperName":CC:"Naked"
         ldr     r3, [r0, #(MachState___R4_R11 + (($regIndex-4)*4))]
 
         cmp     r2, r3
-        bne     0f
+        bne     %FT0
         ldr     $reg, [r2]
 0
 
@@ -2407,7 +2407,7 @@ pShadow  SETS "r7"
         ldr     $__wbscratch, =$g_GCShadowEnd
         ldr     $__wbscratch, [$__wbscratch]
         cmp     $pShadow, $__wbscratch
-        bhs     0f
+        bhs     %FT0
 
         ; *pShadow = $valReg
         str     $valReg, [$pShadow]
@@ -2419,7 +2419,7 @@ pShadow  SETS "r7"
         ; if (*$ptrReg == $valReg) goto end
         ldr     $__wbscratch, [$ptrReg]
         cmp     $__wbscratch, $valReg
-        beq     0f
+        beq     %FT0
 
         ; *pShadow = INVALIDGCVALUE (0xcccccccd)
         movw    $__wbscratch, #0xcccd
@@ -2476,12 +2476,12 @@ tempReg     SETS "$tmpReg"
         ; card table.
         LOAD_GC_GLOBAL $__wbscratch, g_ephemeral_low
         cmp     $valReg, $__wbscratch
-        blo     0f
+        blo     %FT0
         ; Only in post grow higher generation can be beyond ephemeral segment 
         IF $postGrow
             LOAD_GC_GLOBAL $__wbscratch, g_ephemeral_high
             cmp     $valReg, $__wbscratch
-            bhs     0f
+            bhs     %FT0
         ENDIF
 
         ; Update the card table.
@@ -2572,7 +2572,7 @@ tempReg     SETS "$tmpReg"
         JIT_CHECKEDWRITEBARRIER_SP $name, $post
     WRITE_BARRIER_ENTRY $name
         str     r1, [r0]                        ; Write the reference
-        CHECK_GC_HEAP_RANGE r0, 1f             ; Check whether the destination is in the GC heap
+        CHECK_GC_HEAP_RANGE r0, %F1             ; Check whether the destination is in the GC heap
         UPDATE_GC_SHADOW  r0, r1                ; Update the shadow GC heap for debugging
         UPDATE_CARD_TABLE r0, r1, {false}, $post; Update the card table if necessary
 1
@@ -2583,7 +2583,7 @@ tempReg     SETS "$tmpReg"
     MACRO
         JIT_CHECKEDWRITEBARRIER_MP $name, $post
     WRITE_BARRIER_ENTRY $name
-        CHECK_GC_HEAP_RANGE r0, 1f             ; Check whether the destination is in the GC heap
+        CHECK_GC_HEAP_RANGE r0, %F1             ; Check whether the destination is in the GC heap
         dmb                                     ; Perform a memory barrier
         str     r1, [r0]                        ; Write the reference
         UPDATE_GC_SHADOW  r0, r1                ; Update the shadow GC heap for debugging
@@ -2615,7 +2615,7 @@ tempReg     SETS "$tmpReg"
         ENDIF
         ldr     r2, [r1]                        ; Load target object ref from source pointer
         str     r2, [r0]                        ; Write the reference to the destination pointer
-        CHECK_GC_HEAP_RANGE r0, 1f             ; Check whether the destination is in the GC heap
+        CHECK_GC_HEAP_RANGE r0, %F1             ; Check whether the destination is in the GC heap
         UPDATE_GC_SHADOW  r0, r2                ; Update the shadow GC heap for debugging
         UPDATE_CARD_TABLE r0, r2, $mp, $post, r2 ; Update the card table if necessary (trash r2 rather than r0)
 1
@@ -2732,7 +2732,7 @@ $__RealName
 
         bl          DynamicHelperWorker
 
-        cbnz        r0, 0f
+        cbnz        r0, %FT0
         ldr         r0, [sp,#(__PWTB_TransitionBlock+9*4)]  ; The result is stored in the argument area of the transition block
 
         EPILOG_WITH_TRANSITION_BLOCK_RETURN

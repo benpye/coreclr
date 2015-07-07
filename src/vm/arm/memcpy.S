@@ -18,11 +18,6 @@
 .syntax unified
 .thumb
 
-        //IMPORT FCallMemCpy_GCPoll
-        //IMPORT g_TrapReturningThreads
-
-        //AREA    |.text|,ALIGN=5,CODE,READONLY
-
 //
 // void *memcpy(void *dst, const void *src, size_t length)
 //

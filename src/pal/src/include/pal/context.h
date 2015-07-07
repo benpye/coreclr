@@ -161,7 +161,7 @@ typedef ucontext_t native_context_t;
 #define MCREG_Pc(mc)        ((mc).arm_pc)
 #define MCREG_Cpsr(mc)      ((mc).arm_cpsr)
 
-#else
+#elif defined(_X86_)
 
 #define MCREG_Ebx(mc)       ((mc).mc_ebx)
 #define MCREG_Ecx(mc)       ((mc).mc_ecx)
@@ -176,7 +176,9 @@ typedef ucontext_t native_context_t;
 #define MCREG_Esp(mc)       ((mc).mc_esp)
 #define MCREG_SegSs(mc)     ((mc).mc_ss)
 
-#endif // _ARM_
+#else
+#error "Unsupported arch"
+#endif
 
 #endif // BIT64
 
@@ -226,7 +228,7 @@ typedef ucontext_t native_context_t;
 #define PTREG_Lr(ptreg)        ((ptreg).uregs[14])
 #define PTREG_Pc(ptreg)        ((ptreg).uregs[15])
 #define PTREG_Cpsr(ptreg)      ((ptreg).uregs[16])
-#else
+#elif defined(_X86_)
 #define PTREG_Ebx(ptreg)    ((ptreg).ebx)
 #define PTREG_Ecx(ptreg)    ((ptreg).ecx)
 #define PTREG_Edx(ptreg)    ((ptreg).edx)
@@ -238,7 +240,8 @@ typedef ucontext_t native_context_t;
 #define PTREG_SegCs(ptreg)  ((ptreg).xcs)
 #define PTREG_SegSs(ptreg)  ((ptreg).xss)
 #define PTREG_Esp(ptreg)    ((ptreg).esp)
-#endif
+#else
+#error "Unsupported arch"
 
 #endif // BIT64
 

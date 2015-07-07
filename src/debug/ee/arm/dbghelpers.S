@@ -5,15 +5,6 @@
 
 #include "unixasmmacros.inc"
 
-//    IMPORT FuncEvalHijackWorker
-//    IMPORT FuncEvalHijackPersonalityRoutine
-//    IMPORT ExceptionHijackWorker
-//    IMPORT ExceptionHijackPersonalityRoutine
-//    EXPORT ExceptionHijackEnd
-
-//
-//    TEXTAREA
-
 //
 // hijacking stub used to perform a func-eval, see Debugger::FuncEvalSetup() for use.
 //
@@ -21,7 +12,7 @@
 //   r0  : pointer to DebuggerEval object
 //
 
-NESTED_ENTRY FuncEvalHijack,_TEXT,FuncEvalHijackPersonalityRoutine
+NESTED_ENTRY FuncEvalHijack, _TEXT, FuncEvalHijackPersonalityRoutine
 
     // NOTE: FuncEvalHijackPersonalityRoutine is dependent on the stack layout so if
     //       you change the prolog you will also need to update the personality routine.
@@ -54,7 +45,7 @@ NESTED_END FuncEvalHijack, _TEXT
 //   r3 : void* pdata
 //
 
-NESTED_ENTRY ExceptionHijack,_TEXT,ExceptionHijackPersonalityRoutine
+NESTED_ENTRY ExceptionHijack, _TEXT, ExceptionHijackPersonalityRoutine
 
     //CHECK_STACK_ALIGNMENT
 

@@ -30,6 +30,8 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86_64 OR CMAKE_SYSTEM_PROCESSOR STREQUAL amd
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL armv7l)
   set(PAL_CMAKE_PLATFORM_ARCH_ARM 1)
   add_definitions(-D_ARM_)
+else()
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
@@ -196,19 +198,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
   if(PAL_CMAKE_PLATFORM_ARCH_ARM)
     target_link_libraries(coreclrpal
       gcc_s
-      pthread
-      rt
-      dl
-      unwind
-    )
-  else()
-    target_link_libraries(coreclrpal
-      pthread
-      rt
-      dl
-      unwind
     )
   endif()
+    
+  target_link_libraries(coreclrpal
+    pthread
+    rt
+    dl
+    unwind
+  )
 endif(CMAKE_SYSTEM_NAME STREQUAL Linux)
 
 if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)

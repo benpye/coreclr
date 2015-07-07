@@ -35,13 +35,7 @@ SET_DEFAULT_DEBUG_CHANNEL(DEBUG);
 // in context2.S
 extern void CONTEXT_CaptureContext(LPCONTEXT lpContext);
 
-#if HAVE_BSD_REGS_T
-#include <machine/reg.h>
-#include <machine/npx.h>
-#endif  // HAVE_BSD_REGS_T
-#if HAVE_PT_REGS
 #include <asm/ptrace.h>
-#endif  // HAVE_PT_REGS
 
 #define ASSIGN_CONTROL_REGS \
         ASSIGN_REG(Sp)     \
@@ -83,9 +77,6 @@ Return
 --*/
 BOOL CONTEXT_GetRegisters(DWORD processId, ucontext_t *registers)
 {
-#if HAVE_BSD_REGS_T
-    int regFd = -1;
-#endif  // HAVE_BSD_REGS_T
     BOOL bRet = FALSE;
 
     if (processId == GetCurrentProcessId()) 
@@ -96,34 +87,6 @@ BOOL CONTEXT_GetRegisters(DWORD processId, ucontext_t *registers)
             ASSERT("getcontext() failed %d (%s)\n", errno, strerror(errno));
             return FALSE;
         }
-#elif HAVE_BSD_REGS_T
-        char buf[MAX_PATH];
-        struct reg bsd_registers;
-
-        sprintf_s(buf, sizeof(buf), "/proc/%d/regs", processId);
-
-        if ((regFd = PAL__open(buf, O_RDONLY)) == -1) 
-        {
-          ASSERT("PAL__open() failed %d (%s) \n", errno, strerror(errno));
-          return FALSE;
-        }
-
-        if (lseek(regFd, 0, 0) == -1)
-        {
-            ASSERT("lseek() failed %d (%s)\n", errno, strerror(errno));
-            goto EXIT;
-        }
-
-        if (read(regFd, &bsd_registers, sizeof(bsd_registers)) != sizeof(bsd_registers))
-        {
-            ASSERT("read() failed %d (%s)\n", errno, strerror(errno));
-            goto EXIT;
-        }
-
-#define ASSIGN_REG(reg) MCREG_##reg(registers->uc_mcontext) = BSDREG_##reg(bsd_registers);
-        ASSIGN_ALL_REGS
-#undef ASSIGN_REG
-
 #else
 #error "Don't know how to get current context on this platform!"
 #endif
@@ -133,9 +96,6 @@ BOOL CONTEXT_GetRegisters(DWORD processId, ucontext_t *registers)
 #if HAVE_PT_REGS
         struct pt_regs ptrace_registers;
         if (ptrace((__ptrace_request)PT_GETREGS, processId, (caddr_t) &ptrace_registers, 0) == -1)
-#elif HAVE_BSD_REGS_T
-        struct reg ptrace_registers;
-        if (ptrace(PT_GETREGS, processId, (caddr_t) &ptrace_registers, 0) == -1)
 #endif
         {
             ASSERT("Failed ptrace(PT_GETREGS, processId:%d) errno:%d (%s)\n",
@@ -144,21 +104,12 @@ BOOL CONTEXT_GetRegisters(DWORD processId, ucontext_t *registers)
 
 #if HAVE_PT_REGS
 #define ASSIGN_REG(reg) MCREG_##reg(registers->uc_mcontext) = PTREG_##reg(ptrace_registers);
-#elif HAVE_BSD_REGS_T
-#define ASSIGN_REG(reg) MCREG_##reg(registers->uc_mcontext) = BSDREG_##reg(ptrace_registers);
 #endif
         ASSIGN_ALL_REGS
 #undef ASSIGN_REG
     }
     
     bRet = TRUE;
-#if HAVE_BSD_REGS_T
-EXIT :
-    if (regFd != -1)
-    {
-        close(regFd);
-    }
-#endif  // HAVE_BSD_REGS_T
     return bRet;
 }
 
@@ -250,8 +201,6 @@ CONTEXT_SetThreadContext(
 
 #if HAVE_PT_REGS
     struct pt_regs ptrace_registers;
-#elif HAVE_BSD_REGS_T
-    struct reg ptrace_registers;
 #endif
 
     if (lpContext == NULL)
@@ -283,8 +232,6 @@ CONTEXT_SetThreadContext(
     {   
 #if HAVE_PT_REGS
         if (ptrace((__ptrace_request)PT_GETREGS, dwProcessId, (caddr_t)&ptrace_registers, 0) == -1)
-#elif HAVE_BSD_REGS_T
-        if (ptrace(PT_GETREGS, dwProcessId, (caddr_t)&ptrace_registers, 0) == -1)
 #endif
         {
             ASSERT("Failed ptrace(PT_GETREGS, processId:%d) errno:%d (%s)\n",
@@ -295,8 +242,6 @@ CONTEXT_SetThreadContext(
 
 #if HAVE_PT_REGS
 #define ASSIGN_REG(reg) PTREG_##reg(ptrace_registers) = lpContext->reg;
-#elif HAVE_BSD_REGS_T
-#define ASSIGN_REG(reg) BSDREG_##reg(ptrace_registers) = lpContext->reg;
 #endif
         if (lpContext->ContextFlags & CONTEXT_CONTROL)
         {
@@ -310,8 +255,6 @@ CONTEXT_SetThreadContext(
 
 #if HAVE_PT_REGS        
         if (ptrace((__ptrace_request)PT_SETREGS, dwProcessId, (caddr_t)&ptrace_registers, 0) == -1)
-#elif HAVE_BSD_REGS_T
-        if (ptrace(PT_SETREGS, dwProcessId, (caddr_t)&ptrace_registers, 0) == -1)
 #endif
         {
             ASSERT("Failed ptrace(PT_SETREGS, processId:%d) errno:%d (%s)\n",

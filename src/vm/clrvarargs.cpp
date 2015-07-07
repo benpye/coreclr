@@ -39,7 +39,7 @@ void VARARGS::MarshalToManagedVaList(va_list va, VARARGS *dataout)
     dataout->ArgCookie = NULL;
     dataout->ArgPtr = (BYTE*)va;
 #else
-// TODO: Implement this marshalling
+    PORTABILITY_ASSERT("Implement for ARM");
 #endif
 }
 
@@ -118,6 +118,6 @@ VARARGS::MarshalToUnmanagedVaList(
         }
     }
 #else
-// TODO: Implement this marshalling
+    PORTABILITY_ASSERT("Implement for ARM");
 #endif
 } // VARARGS::MarshalToUnmanagedVaList

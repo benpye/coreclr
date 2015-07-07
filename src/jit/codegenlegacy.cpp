@@ -1397,7 +1397,7 @@ bool                CodeGen::genMakeIndAddrMode(GenTreePtr   addr,
     unsigned        mul;
 
     GenTreePtr      tmp;
-    int             ixv = INT_MAX; // unset value
+    int            ixv = INT_MAX; // unset value
     
     GenTreePtr      scaledIndexVal;
 

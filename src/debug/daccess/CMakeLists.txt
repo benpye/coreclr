@@ -15,6 +15,8 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   add_definitions(-DDBG_TARGET_ARM=1)
   add_definitions(-DDBG_TARGET_WIN32=1)
   add_definitions(-D_WIN32=1)
+else()
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 include_directories(BEFORE ${VM_DIR})
@@ -58,6 +60,12 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
 
   list(APPEND DACCESS_SOURCES
     arm/primitives.cpp
+  )
+elseif(CLR_CMAKE_PLATFORM_ARCH_I386)
+  include_directories(i386)
+
+  list(APPEND DACCESS_SOURCES
+    i386/primitives.cpp
   )
 endif()
 

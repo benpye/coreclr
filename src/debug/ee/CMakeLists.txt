@@ -12,6 +12,8 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   add_definitions(-DDBG_TARGET_32BIT=1)
   add_definitions(-DDBG_TARGET_ARM=1)
   add_definitions(-DDBG_TARGET_WIN32=1)
+else()
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 
@@ -55,6 +57,11 @@ if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
     ${ARCH_SOURCES_DIR}/debuggerregdisplayhelper.cpp
   )
   list(APPEND CORDBEE_SOURCES_WKS amd64/amd64walker.cpp)
+elseif(CLR_CMAKE_PLATFORM_ARCH_I386)
+  list(APPEND CORDBEE_SOURCES_WKS 
+    ${ARCH_SOURCES_DIR}/debuggerregdisplayhelper.cpp
+  )
+  list(APPEND CORDBEE_SOURCES_WKS i386/x86walker.cpp)
 elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   list(APPEND CORDBEE_SOURCES_WKS arm/armwalker.cpp)
 endif()

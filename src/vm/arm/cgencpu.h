@@ -1004,6 +1004,7 @@ inline BOOL ClrFlushInstructionCache(LPCVOID pCodeAddr, size_t sizeOfCode)
 #endif
 }
 
+#ifndef FEATURE_IMPLICIT_TLS
 //
 // JIT HELPER ALIASING FOR PORTABILITY.
 //
@@ -1015,7 +1016,11 @@ inline BOOL ClrFlushInstructionCache(LPCVOID pCodeAddr, size_t sizeOfCode)
 #define JIT_GetSharedGCStaticBaseNoCtor     JIT_GetSharedGCStaticBaseNoCtor_InlineGetAppDomain
 #define JIT_GetSharedNonGCStaticBaseNoCtor  JIT_GetSharedNonGCStaticBaseNoCtor_InlineGetAppDomain
 
+#endif
+
+#ifndef FEATURE_PAL
 #define JIT_Stelem_Ref                      JIT_Stelem_Ref
+#endif
 
 //------------------------------------------------------------------------
 //

@@ -83,7 +83,7 @@ elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   )
   add_definitions(-DLEGACY_BACKEND) 
 else()
-  # IMPLEMENT THIS
+  message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
 
 set( SOURCES

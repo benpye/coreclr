@@ -366,9 +366,6 @@ void ValidateWriteBarriers()
 }
 #endif // _DEBUG
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Winvalid-token-paste"
-
 #define UPDATE_WB(_proc,_grow)   \
     CopyWriteBarrier((PCODE)JIT_WriteBarrier, (PCODE)JIT_WriteBarrier_##_proc##_##_grow##, (PCODE)JIT_WriteBarrier_##_proc##_##_grow##_End); \
     wbMapping[WriteBarrierIndex].from = (PBYTE)JIT_WriteBarrier_##_proc##_##_grow##; \
@@ -458,7 +455,6 @@ void UpdateGCWriteBarriers(BOOL postGrow = false)
     ComputeWriteBarrierRange(&pbAlteredRange, &cbAlteredRange);
     FlushInstructionCache(GetCurrentProcess(), pbAlteredRange, cbAlteredRange);
 }
-#pragma clang diagnostic pop
 
 void StompWriteBarrierResize(BOOL bReqUpperBoundsCheck)
 {
@@ -2529,6 +2525,7 @@ EXTERN_C void JIT_NewArr1OBJ_MP_InlineGetThread__PatchTLSOffset();
 extern "C" void STDCALL JIT_PatchedCodeStart();
 extern "C" void STDCALL JIT_PatchedCodeLast();
 
+#ifndef FEATURE_IMPLICIT_TLS
 static const LPVOID InlineGetThreadLocations[] = {
     (PVOID)JIT_TrialAllocSFastMP_InlineGetThread__PatchTLSOffset,
     (PVOID)JIT_BoxFastMP_InlineGetThread__PatchTLSOffset,
@@ -2536,6 +2533,7 @@ static const LPVOID InlineGetThreadLocations[] = {
     (PVOID)JIT_NewArr1VC_MP_InlineGetThread__PatchTLSOffset,
     (PVOID)JIT_NewArr1OBJ_MP_InlineGetThread__PatchTLSOffset,
 };
+#endif
 
 //EXTERN_C Object* JIT_TrialAllocSFastMP(CORINFO_CLASS_HANDLE typeHnd_);
 Object* JIT_TrialAllocSFastMP(CORINFO_CLASS_HANDLE typeHnd_);

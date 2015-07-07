@@ -1411,14 +1411,8 @@ public:
     var_types                       GetHfaType(GenTreePtr tree);
     unsigned                        GetHfaSlots(GenTreePtr tree);
 
-    // Only Visual C++ supports inline functions with definitions elsewhere
-#if defined(_MSC_VER_)
-    inline var_types                GetHfaType(CORINFO_CLASS_HANDLE hClass);
-    inline unsigned                 GetHfaSlots(CORINFO_CLASS_HANDLE hClass);
-#else
-    var_types                GetHfaType(CORINFO_CLASS_HANDLE hClass);
-    unsigned                 GetHfaSlots(CORINFO_CLASS_HANDLE hClass);
-#endif
+    var_types                       GetHfaType(CORINFO_CLASS_HANDLE hClass);
+    unsigned                        GetHfaSlots(CORINFO_CLASS_HANDLE hClass);
 
 #endif // _TARGET_ARM_
 
