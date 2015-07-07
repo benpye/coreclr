@@ -674,15 +674,6 @@ Done:
 // This function is used by both the personality routine and the debugger to retrieve the original CONTEXT.
         .macro GenerateRedirectedHandledJITCaseStub reason
 
-//        GBLS __RedirectionStubFuncName
-//        GBLS __RedirectionStubEndFuncName
-//        GBLS __RedirectionFuncName
-//__RedirectionStubFuncName = "RedirectedHandledJITCaseFor":CC:"$reason":CC:"_Stub"
-//__RedirectionStubEndFuncName SETS "RedirectedHandledJITCaseFor":CC:"$reason":CC:"_StubEnd"
-//__RedirectionFuncName SETS "|?RedirectedHandledJITCaseFor":CC:"$reason":CC:"@Thread@@CAXXZ|"
-
-//        IMPORT $__RedirectionFuncName
-
         NESTED_ENTRY RedirectedHandledJITCaseFor\reason\()_Stub, _TEXT, NoHandler
 
         push {r7,lr}     // return address
@@ -1184,16 +1175,12 @@ DelayLoad_MethodCall:
 
     .macro DynamicHelper frameFlags, suffix
 
-//        GBLS __FakePrologName
 __FakePrologName="DelayLoad_Helper\suffix\()_FakeProlog"
 
         NESTED_ENTRY DelayLoad_Helper\suffix\()_FakeProlog, _TEXT, NoHandler
 
         // Match what the lazy thunk has pushed. The actual method arguments will be spilled later.
         push         {r1-r3}
-
-//        GBLS __RealName
-//__RealName SETS "DelayLoad_Helper":CC:"$suffix"
 
         // This is where execution really starts.
 DelayLoad_Helper\suffix:

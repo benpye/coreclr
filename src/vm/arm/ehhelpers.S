@@ -15,11 +15,6 @@
 .syntax unified
 .thumb
 
-//    IMPORT FixContextHandler
-//    IMPORT LinkFrameAndThrow
-//    IMPORT HijackHandler
-//    IMPORT ThrowControlForThread
-
 //
 // WARNING!!  These functions immediately ruin thread unwindability.  This is
 // WARNING!!  OK as long as there is a mechanism for saving the thread context

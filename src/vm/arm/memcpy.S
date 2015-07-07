@@ -15,6 +15,6 @@
 // Copy a block of memory in a forward direction.
 //
 
-        LEAF_ENTRY FCallMemcpy, _TEXT
+    LEAF_ENTRY FCallMemcpy, _TEXT
         b C_FUNC(memcpy)
-        LEAF_END FCallMemcpy, _TEXT
+    LEAF_END FCallMemcpy, _TEXT
