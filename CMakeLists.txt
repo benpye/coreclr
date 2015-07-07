@@ -348,12 +348,6 @@ add_compile_options(-Wno-invalid-offsetof)
 # may not generate the same object layout as MSVC.
 add_compile_options(-Wno-incompatible-ms-struct)
 
-if(CLR_CMAKE_PLATFORM_UNIX_TARGET_ARM)
-  #This causes some issues in the JIT
-  add_compile_options(-Wno-unused-value)
-  add_compile_options(-Wno-invalid-token-paste)
-endif()
-
 # The -fms-extensions enable the stuff like __if_exists, __declspec(uuid()), etc.
 add_compile_options(-fms-extensions )
 #-fms-compatibility      Enable full Microsoft Visual C++ compatibility

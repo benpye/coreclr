@@ -6618,7 +6618,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #else
         assert(!"getFPInstructionSet() is not implemented for target arch");
         unreached();
-        InstructionSet_NONE;
+        return InstructionSet_NONE;
 #endif
     }
 
