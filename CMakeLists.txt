@@ -445,7 +445,6 @@ elseif (CLR_CMAKE_PLATFORM_ARCH_ARM)
   endif (CLR_CMAKE_PLATFORM_UNIX_TARGET_ARM)
   add_definitions(-D_TARGET_ARM_=1)
   add_definitions(-DDBG_TARGET_ARM)
-  add_definitions(-DSTUBLINKER_GENERATES_UNWIND_INFO)
 else ()
   # TODO: Support this
   message(FATAL_ERROR "Not Implemented!")

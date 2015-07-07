@@ -354,6 +354,12 @@ StubLinker::StubLinker()
     m_pPatchLabel       = NULL;
     m_stackSize         = 0;
     m_fDataOnly         = FALSE;
+#ifdef _TARGET_ARM_
+    m_fProlog           = FALSE;
+    m_cCalleeSavedRegs  = 0;
+    m_cbStackFrame      = 0;
+    m_fPushArgRegs      = FALSE;
+#endif
 #ifdef STUBLINKER_GENERATES_UNWIND_INFO
 #ifdef _DEBUG
     m_pUnwindInfoCheckLabel = NULL;
@@ -362,12 +368,6 @@ StubLinker::StubLinker()
     m_pUnwindInfoList   = NULL;
     m_nUnwindSlots      = 0;
     m_fHaveFramePointer = FALSE;
-#endif
-#ifdef _TARGET_ARM_
-    m_fProlog           = FALSE;
-    m_cCalleeSavedRegs  = 0;
-    m_cbStackFrame      = 0;
-    m_fPushArgRegs      = FALSE;
 #endif
 #ifdef _TARGET_ARM64_
     m_fProlog           = FALSE;
@@ -1327,11 +1327,7 @@ bool StubLinker::EmitUnwindInfo(Stub* pStub, int globalsize)
         COMPlusThrowOM();
     }
 
-#ifndef FEATURE_PAL
     BYTE *pbRegionBaseAddress = (BYTE*)mbi.AllocationBase;
-#else
-    BYTE *pbRegionBaseAddress = (BYTE*)mbi.BaseAddress;
-#endif
 
 #ifdef _DEBUG
     static SIZE_T MaxSegmentSize = -1;
@@ -1828,13 +1824,8 @@ bool StubLinker::EmitUnwindInfo(Stub* pStub, int globalsize)
             if (mbi.State & MEM_FREE)
                 break;
 
-#ifndef FEATURE_PAL
             if (pbRegionBaseAddress != mbi.AllocationBase)
                 break;
-#else
-            if (pbRegionBaseAddress != mbi.BaseAddress)
-                break;
-#endif
 
             pbCurrentBase += mbi.RegionSize;
         }
