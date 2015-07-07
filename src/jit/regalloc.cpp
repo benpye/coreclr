@@ -1934,7 +1934,7 @@ PREDICT_REG_COMMON:
                     unsigned tgtIndex1 = rpGetVarIndexForPredict(predictReg);
                     LclVarDsc * tgtVar   = lvaTable + lvaTrackedToVarNum[tgtIndex1];
                     VarSetOps::MakeSingleton(this, tgtIndex1);
-    
+
                     noway_assert(tgtVar->lvVarIndex == tgtIndex1);
                     noway_assert(tgtVar->lvRegNum   != REG_STK);  /* Must have been enregistered */
 #ifndef _TARGET_AMD64_

@@ -10826,7 +10826,7 @@ CORINFO_CLASS_HANDLE Compiler::GetHfaClassHandle(GenTreePtr tree)
             return GetHfaClassHandle(tree->gtOp.gtOp1);
             
         default:
-            break;
+            unreached();
         }
     }
     return NO_CLASS_HANDLE;

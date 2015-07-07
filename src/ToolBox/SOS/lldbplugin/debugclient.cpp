@@ -894,6 +894,7 @@ DebugClient::GetThreadContextById(
     dtcontext->R9 = GetRegister(frame, "r9");
     dtcontext->R10 = GetRegister(frame, "r10");
     dtcontext->R11 = GetRegister(frame, "r11");
+    dtcontext->R12 = GetRegister(frame, "r12");
 #endif
 
     hr = S_OK;

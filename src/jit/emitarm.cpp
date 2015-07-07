@@ -1562,7 +1562,7 @@ COMMON_PUSH_POP:
         break;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T1_B)  ||
            (fmt == IF_T1_L0) ||
@@ -1624,7 +1624,7 @@ void                emitter::emitIns_R(instruction ins,
         return;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T1_D1) ||
            (fmt == IF_T2_E2));
@@ -1939,7 +1939,7 @@ void                emitter::emitIns_R_I(instruction ins,
         break;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T1_F ) ||
            (fmt == IF_T1_J0) ||
@@ -2326,7 +2326,7 @@ void                emitter::emitIns_R_I_I(instruction ins,
         break;
         
     default:
-        break;
+        unreached();
     }
     assert(fmt == IF_T2_D1);
     assert(sf != INS_FLAGS_DONT_CARE);
@@ -3161,7 +3161,7 @@ void                emitter::emitIns_R_R_I_I(instruction ins,
         break;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T2_D0));
     assert(sf != INS_FLAGS_DONT_CARE);
@@ -3345,7 +3345,7 @@ COMMON_THUMB2_LDST:
         break;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T2_C0) ||
            (fmt == IF_T2_E0) ||
@@ -3406,7 +3406,7 @@ void                emitter::emitIns_R_R_R_R(instruction ins,
         fmt = IF_T2_F2;
         break;
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_T2_F1) || (fmt == IF_T2_F2));
 
@@ -4270,7 +4270,7 @@ void                emitter::emitIns_J(instruction   ins,
         break;
         
     default:
-        break;
+        unreached();
     }
     assert((fmt == IF_LARGEJMP) ||
            (fmt == IF_T2_J2));
@@ -4416,7 +4416,7 @@ void                emitter::emitIns_R_L  (instruction   ins,
         fmt = IF_T2_N1;
         break;
     default:
-        break;
+        unreached();
     }
     assert(fmt == IF_T2_N1);
 
@@ -6690,7 +6690,7 @@ static bool        insAlwaysSetFlags(instruction ins)
         break;
         
     default:
-        break;
+        unreached();
     }
     return result;
 }
