@@ -1081,53 +1081,174 @@ DoWrite:
     b       JIT_WriteBarrier
 
     LEAF_END JIT_Stelem_DoWrite, _TEXT
+    
+#define __wbScratch r3
+#define pShadow r7
 
-g_rgWriteBarrierDescriptors:
-    .global g_rgWriteBarrierDescriptors
-
-    //BEGIN_WRITE_BARRIERS
+    .macro START_WRITE_BARRIER name
+        __\name\()__g_lowest_address_offset = 0xffff
+        __\name\()__g_highest_address_offset = 0xffff
+        __\name\()__g_ephemeral_low_offset = 0xffff
+        __\name\()__g_ephemeral_high_offset = 0xffff
+        __\name\()__g_card_table_offset = 0xffff
+     .endm
+    
+    .macro LOAD_GC_GLOBAL name, regName, globalName
+\name\()__\globalName\()_offset:
+    __\name\()__\globalName\()_offset = (\name\()__\globalName\()_offset - \name)
+        movw \regName, #0
+        movt \regName, #0
+    .endm
+    
+    .macro UPDATE_GC_SHADOW name, ptrReg, valReg
+        // Todo: implement, debugging helper
+    .endm
+    
+    .macro UPDATE_CARD_TABLE name, ptrReg, valReg, mp, postGrow, tmpReg
+            
+        LOAD_GC_GLOBAL \name, __wbScratch, g_ephemeral_low
+        cmp \valReg, __wbScratch
+        blo 0f
+        
+        .if(\postGrow)
+            LOAD_GC_GLOBAL \name, __wbScratch, g_ephemeral_high
+            cmp \valReg, __wbScratch
+            bhs 0f
+        .endif
+        
+        LOAD_GC_GLOBAL \name, __wbScratch, g_card_table
+        add __wbScratch, __wbScratch, \ptrReg, lsr #10
+        
+        .if(\mp)
+            ldrb \tmpReg, [__wbScratch]
+            cmp \tmpReg, #0xff
+            itt ne
+            movne \tmpReg, 0xff
+            strbne \tmpReg, [__wbScratch]
+        .else
+            mov \tmpReg, #0xff
+            strb \tmpReg, [__wbScratch]
+        .endif
+        
+0:
+    .endm
+    
+    .macro CHECK_GC_HEAP_RANGE name, ptrReg, label
+        LOAD_GC_GLOBAL \name, __wbScratch, g_lowest_address
+        cmp \ptrReg, __wbScratch
+        blo \label
+        LOAD_GC_GLOBAL \name, __wbScratch, g_highest_address
+        cmp \ptrReg, __wbScratch
+        bhs \label
+    .endm
+    
+    .macro JIT_WRITEBARRIER name, mp, post
+    LEAF_ENTRY \name, _TEXT
+        START_WRITE_BARRIER \name
+        .if(\mp)
+            dmb
+        .endif
+        
+        str r1, [r0]
+        UPDATE_GC_SHADOW \name, r0, r1
+        UPDATE_CARD_TABLE \name, r0, r1, \mp, \post, r0
+        bx lr
+    LEAF_END \name, _TEXT
+    .endm
+    
+    .macro JIT_CHECKEDWRITEBARRIER_SP name, post
+    LEAF_ENTRY \name, _TEXT
+        START_WRITE_BARRIER \name
+        str r1, [r0]
+        CHECK_GC_HEAP_RANGE \name, r0, 1f
+        UPDATE_GC_SHADOW \name, r0, r1
+        UPDATE_CARD_TABLE \name, r0, r1, 0, \post, r0
+1:
+        bx lr
+    LEAF_END \name, _TEXT
+    .endm
+    
+    .macro JIT_CHECKEDWRITEBARRIER_MP name, post
+    LEAF_ENTRY \name, _TEXT
+        START_WRITE_BARRIER \name
+        dmb
+        str r1, [r0]
+        CHECK_GC_HEAP_RANGE \name, r0, 1f
+        UPDATE_GC_SHADOW \name, r0, r1
+        UPDATE_CARD_TABLE \name, r0, r1, 1, \post, r0
+        bx lr
+1:
+        str r1, [r0]
+        bx lr
+    LEAF_END \name, _TEXT
+    .endm
+    
+    .macro JIT_BYREFWRITEBARRIER name, mp, post
+    LEAF_ENTRY \name, _TEXT
+        START_WRITE_BARRIER \name
+        .if(\mp)
+            dmb
+        .endif
+        
+        ldr r2, [r1]
+        str r2, [r0]
+        CHECK_GC_HEAP_RANGE \name, r0, 1f
+        UPDATE_GC_SHADOW \name, r0, r2
+        UPDATE_CARD_TABLE \name, r0, r2, \mp, \post, r2
+1:
+        add r0, #4
+        add r1, #4
+        bx lr
+    LEAF_END \name, _TEXT
+    .endm
+    
+    .macro JIT_WRITEBARRIER_DESCRIPTOR name
+        .word \name
+        .word \name\()_End
+        .word __\name\()__g_lowest_address_offset
+        .word __\name\()__g_highest_address_offset
+        .word __\name\()__g_ephemeral_low_offset
+        .word __\name\()__g_ephemeral_high_offset
+        .word __\name\()__g_card_table_offset
+    .endm
 
     // There 4 versions of each write barriers. A 2x2 combination of multi-proc/single-proc and pre/post grow version
-    LEAF_ENTRY JIT_WriteBarrier_SP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_WriteBarrier_SP_Pre,  _TEXT
-    LEAF_ENTRY JIT_WriteBarrier_SP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_WriteBarrier_SP_Post, _TEXT
-    LEAF_ENTRY JIT_WriteBarrier_MP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_WriteBarrier_MP_Pre,  _TEXT
-    LEAF_ENTRY JIT_WriteBarrier_MP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_WriteBarrier_MP_Post, _TEXT
+    JIT_WRITEBARRIER JIT_WriteBarrier_SP_Pre,  0, 0
+    JIT_WRITEBARRIER JIT_WriteBarrier_SP_Post, 0, 1
+    JIT_WRITEBARRIER JIT_WriteBarrier_MP_Pre,  1, 0
+    JIT_WRITEBARRIER JIT_WriteBarrier_MP_Post, 1, 1
     
-    LEAF_ENTRY JIT_CheckedWriteBarrier_SP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_CheckedWriteBarrier_SP_Pre,  _TEXT
-    LEAF_ENTRY JIT_CheckedWriteBarrier_SP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_CheckedWriteBarrier_SP_Post, _TEXT
-    LEAF_ENTRY JIT_CheckedWriteBarrier_MP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_CheckedWriteBarrier_MP_Pre,  _TEXT
-    LEAF_ENTRY JIT_CheckedWriteBarrier_MP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_CheckedWriteBarrier_MP_Post, _TEXT
+    JIT_CHECKEDWRITEBARRIER_SP JIT_CheckedWriteBarrier_SP_Pre,  0
+    JIT_CHECKEDWRITEBARRIER_SP JIT_CheckedWriteBarrier_SP_Post, 1
+    JIT_CHECKEDWRITEBARRIER_MP JIT_CheckedWriteBarrier_MP_Pre,  0
+    JIT_CHECKEDWRITEBARRIER_MP JIT_CheckedWriteBarrier_MP_Post, 1
 
-    LEAF_ENTRY JIT_ByRefWriteBarrier_SP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_ByRefWriteBarrier_SP_Pre,  _TEXT
-    LEAF_ENTRY JIT_ByRefWriteBarrier_SP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_ByRefWriteBarrier_SP_Post, _TEXT
-    LEAF_ENTRY JIT_ByRefWriteBarrier_MP_Pre,  _TEXT
-        bx lr
-    LEAF_END JIT_ByRefWriteBarrier_MP_Pre,  _TEXT
-    LEAF_ENTRY JIT_ByRefWriteBarrier_MP_Post, _TEXT
-        bx lr
-    LEAF_END JIT_ByRefWriteBarrier_MP_Post, _TEXT
+    JIT_BYREFWRITEBARRIER JIT_ByRefWriteBarrier_SP_Pre,  0, 0
+    JIT_BYREFWRITEBARRIER JIT_ByRefWriteBarrier_SP_Post, 0, 1
+    JIT_BYREFWRITEBARRIER JIT_ByRefWriteBarrier_MP_Pre,  1, 0
+    JIT_BYREFWRITEBARRIER JIT_ByRefWriteBarrier_MP_Post, 1, 1
+    
+//    .section .clrwb, "d"
+g_rgWriteBarrierDescriptors:
 
-    //END_WRITE_BARRIERS
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_WriteBarrier_SP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_WriteBarrier_SP_Post
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_WriteBarrier_MP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_WriteBarrier_MP_Post
+    
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_CheckedWriteBarrier_SP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_CheckedWriteBarrier_SP_Post
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_CheckedWriteBarrier_MP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_CheckedWriteBarrier_MP_Post
+    
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_SP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_SP_Post
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_MP_Pre
+    JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_MP_Post
+    
+//    .text
+    
+    .global g_rgWriteBarrierDescriptors
 
 #ifdef FEATURE_READYTORUN
 
