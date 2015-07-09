@@ -72,7 +72,7 @@ LNoFloatingPoint:
         ldr     r4, [r5,#CallDescrData__pArgumentRegisters]
         ldm     r4, {r0-r3}
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         // call pTarget
         // Note that remoting expect target in r4.
@@ -114,7 +114,7 @@ LNoFloatHFAReturn:
         b       LReturnDone
 LNoDoubleHFAReturn:
 
-//        EMIT_BREAKPOINT // Unreachable
+        EMIT_BREAKPOINT // Unreachable
 
 LFloatingPointReturnDone:
 
@@ -291,7 +291,7 @@ LNullThis:
         push {r0-r4,lr}
         vpush {d0-d7}
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         mov     r0, r12
         bl      TheUMEntryPrestubWorker
@@ -319,7 +319,7 @@ LNullThis:
 UMThunkStub_HiddenArg = 4*4
 UMThunkStub_StackArgs = 10*4
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         bl                  GetThread
         cbz                 r0, UMThunkStub_DoThreadSetup
@@ -367,7 +367,7 @@ UMThunkStub_ArgumentsSetup:
         // reload argument registers
         ldm                 r7, {r0-r3}
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         blx                 r4
 
@@ -427,7 +427,7 @@ UMThunkStub_WrongAppDomain:
         push {r4-r7,r11,lr}
         mov r7, sp
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         mov                 r12, r3                     // r12 = UMEntryThunk *
 
@@ -464,7 +464,7 @@ UM2MThunk_WrapperHelper_ArgumentsSetup:
         // reload argument registers
         ldm                 r5, {r0-r3}
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         blx                 r4
 
@@ -521,7 +521,7 @@ ThePreStubPatchLabel:
                                                         // arbitrary register to keep stack aligned
         vpush {d0-d7}                                   // Spill floating point argument registers
 
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         mov     r0, r12
         bl      NDirectImportWorker
@@ -690,7 +690,7 @@ Done:
         sub sp, sp, r0
 
         // stack must be 8 byte aligned
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
 
         //
         // Save a copy of the redirect CONTEXT*.
@@ -711,7 +711,7 @@ Done:
         //
         bl _RedirectedHandledJITCaseFor\reason\()_Stub@Thread@@CAXXZ
 
-        //EMIT_BREAKPOINT // Unreachable
+        EMIT_BREAKPOINT // Unreachable
 
 // Put a label here to tell the debugger where the end of this function is.
 RedirectedHandledJITCaseFor\reason\()_StubEnd:
@@ -801,7 +801,7 @@ stackProbe_loop:
     vstm                sp, {d0-d7}
 
 
-    //CHECK_STACK_ALIGNMENT
+    CHECK_STACK_ALIGNMENT
 
     // R12 contains an address that is 4 bytes ahead of
     // where the thunk starts. Refer to ZapImportVirtualThunk::Save
@@ -910,7 +910,7 @@ stackProbe_loop:
     push {r0-r1, r11, lr} // save integer return value
     vpush {d0-d3}         // floating point return value
 
-    //CHECK_STACK_ALIGNMENT
+    CHECK_STACK_ALIGNMENT
 
     bl          JIT_RareDisableHelperWorker
 
@@ -1044,7 +1044,7 @@ ThrowIndexOutOfRangeException:
     push   {lr}
     push   {r0-r2}
 
-    //CHECK_STACK_ALIGNMENT 
+    CHECK_STACK_ALIGNMENT 
 
     // allow in case val can be casted to array element type
     // call ObjIsInstanceOfNoGC(val, array->GetArrayElementTypeHandle())
@@ -1245,6 +1245,9 @@ g_rgWriteBarrierDescriptors:
     JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_SP_Post
     JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_MP_Pre
     JIT_WRITEBARRIER_DESCRIPTOR JIT_ByRefWriteBarrier_MP_Post
+    
+    // Sentinel value
+    .word 0
     
 //    .text
     

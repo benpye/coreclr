@@ -5,6 +5,9 @@
 
 #include "unixasmmacros.inc"
 
+.syntax unified
+.thumb
+
 //
 // hijacking stub used to perform a func-eval, see Debugger::FuncEvalSetup() for use.
 //
@@ -21,7 +24,7 @@ NESTED_ENTRY FuncEvalHijack, _TEXT, FuncEvalHijackPersonalityRoutine
     // push lr to get good stacktrace in debugger
     push {r0,lr}
 
-    //CHECK_STACK_ALIGNMENT
+    CHECK_STACK_ALIGNMENT
 
     // FuncEvalHijackWorker returns the address we should jump to. 
     bl      FuncEvalHijackWorker
@@ -47,7 +50,7 @@ NESTED_END FuncEvalHijack, _TEXT
 
 NESTED_ENTRY ExceptionHijack, _TEXT, ExceptionHijackPersonalityRoutine
 
-    //CHECK_STACK_ALIGNMENT
+    CHECK_STACK_ALIGNMENT
 
     // make the call
     bl ExceptionHijackWorker
@@ -56,6 +59,6 @@ NESTED_ENTRY ExceptionHijack, _TEXT, ExceptionHijackPersonalityRoutine
     mov r3, r3
 
     // *** should never get here ***
-    bkpt
+    EMIT_BREAKPOINT
 
 NESTED_END ExceptionHijackEnd, _TEXT    

@@ -3,6 +3,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+.macro PATCH_LABEL Name
+        .global C_FUNC(\Name)
+C_FUNC(\Name):
+.endm
+
+.macro LEAF_ENTRY Name, Section
+        .global C_FUNC(\Name)
+#if defined(__APPLE__)
+        .text
+#else
+        .type \Name, %function
+#endif
+C_FUNC(\Name):
+        .cfi_startproc
+.endm
+
+.macro LEAF_END_MARKED Name, Section
+C_FUNC(\Name\()_End):
+        .global C_FUNC(\Name\()_End)
+#if !defined(__APPLE__)
+        .size \Name, .-\Name
+#endif
+        .cfi_endproc
+.endm
+
 .macro NOP_3_BYTE
         nop dword ptr [rax]
 .endm

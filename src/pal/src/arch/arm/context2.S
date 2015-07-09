@@ -10,6 +10,9 @@
 
 #include "unixasmmacros.inc"
 
+.syntax unified
+.thumb
+
 #define CONTEXT_ARM     0x00200000
 
 #define CONTEXT_CONTROL 1 // Sp, Lr, Pc, Cpsr
@@ -87,7 +90,7 @@ LEAF_ENTRY CONTEXT_CaptureContext, _TEXT
     END_PROLOGUE
     
     push {r2}
-    ldr r2, [R0, #(CONTEXT_ContextFlags)]
+    ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_INTEGER)
     pop {r2}
     
@@ -96,6 +99,7 @@ LEAF_ENTRY CONTEXT_CaptureContext, _TEXT
     pop {r1}
     sub sp, sp, #8
     
+    itttt ne
     strne r0, [r0, #(CONTEXT_R0)]
     addne r0, CONTEXT_R1
     stmiane r0, {r1-r12}
@@ -104,23 +108,28 @@ LEAF_ENTRY CONTEXT_CaptureContext, _TEXT
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_CONTROL)
     
+    ittt ne
     addne sp, sp, #(10*4) // This needs to put the stack in the same state as it started
     strne sp, [r0, #(CONTEXT_Sp)]
     subne sp, sp, #(10*4)
     
+    itt ne
     strne lr, [r0, #(CONTEXT_Lr)]
     strne lr, [r0, #(CONTEXT_Pc)]
     
     // Get the APSR pushed onto the stack at the start
     pop {r1}
+    it ne
     strne r1, [r0, #(CONTEXT_Cpsr)]
     
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_FLOATING_POINT)
     
+    itt ne
     vmrsne r3, fpscr
     strne r3, [r0, #(CONTEXT_Fpscr)]
     
+    itttt ne
     addne r0, CONTEXT_D0
     vstmiane r0!, {d0-d15}
     vstmiane r0!, {d16-d31}
@@ -159,22 +168,26 @@ LEAF_ENTRY RtlRestoreContext, _TEXT
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_FLOATING_POINT)
     
+    itttt ne
     addne r0, CONTEXT_D0
     vldmiane r0!, {d0-d15}
     vldmiane r0, {d16-d31}
     subne r0, CONTEXT_D16
     
+    itt ne
     ldrne r3, [r0, #(CONTEXT_Fpscr)]
     vmrsne r3, FPSCR
     
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_CONTROL)
     
+    it eq
     beq LOCAL_LABEL(No_Restore_CONTEXT_CONTROL)
     
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_INTEGER)
     
+    it eq
     beq LOCAL_LABEL(No_Restore_CONTEXT_INTEGER)
     
     ldr R2, [r0, #(CONTEXT_Cpsr)]
@@ -195,8 +208,9 @@ LOCAL_LABEL(No_Restore_CONTEXT_CONTROL):
     ldr r2, [r0, #(CONTEXT_ContextFlags)]
     tst r2, #(CONTEXT_INTEGER)
     
+    itt ne
     addne r0, CONTEXT_R0
-    ldmiane r0, {R0-R12}
+    ldmiane r0, {r0-r12}
 
     sub sp, sp, #4
     bx lr

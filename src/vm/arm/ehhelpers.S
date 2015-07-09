@@ -62,12 +62,12 @@ OFFSET_OF_FRAME=(4 + SIZEOF__GSCookie)
         mov r0, r4                      // move the ptr to FEF in R0
         
         // stack must be 8 byte aligned
-        //CHECK_STACK_ALIGNMENT       
+        CHECK_STACK_ALIGNMENT       
         
         bl            \TARGET
 
         // Target should not return.
-        //EMIT_BREAKPOINT
+        EMIT_BREAKPOINT
 
         NESTED_END \STUB, _TEXT
 
@@ -87,7 +87,7 @@ OFFSET_OF_FRAME=(4 + SIZEOF__GSCookie)
         bl LinkFrameAndThrow
 
         // Target should not return.
-        //EMIT_BREAKPOINT
+        EMIT_BREAKPOINT
 
         NESTED_END NakedThrowHelper2, _TEXT
 

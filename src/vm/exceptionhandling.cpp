@@ -4388,7 +4388,7 @@ VOID UnwindManagedExceptionPass2(EXCEPTION_RECORD* exceptionRecord, CONTEXT* unw
     CONTEXT contextStorage;
     DISPATCHER_CONTEXT dispatcherContext;
     EECodeInfo codeInfo;
-    ULONG64 establisherFrame = NULL;
+    UINT_PTR establisherFrame = NULL;
     PVOID handlerData;
     ULONG64 stackHighAddress = (ULONG64)PAL_GetStackBase();
     ULONG64 stackLowAddress = (ULONG64)PAL_GetStackLimit();
@@ -4424,7 +4424,7 @@ VOID UnwindManagedExceptionPass2(EXCEPTION_RECORD* exceptionRecord, CONTEXT* unw
                 dispatcherContext.FunctionEntry,
                 callerFrameContext,
                 &handlerData,
-                (SIZE_T*)&establisherFrame,
+                &establisherFrame,
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries
@@ -4505,7 +4505,7 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
     DISPATCHER_CONTEXT dispatcherContext;
     EECodeInfo codeInfo;
     UINT_PTR controlPc;
-    ULONG64 establisherFrame = NULL;
+    UINT_PTR establisherFrame = NULL;
     PVOID handlerData;
     ULONG64 stackHighAddress = (ULONG64)PAL_GetStackBase();
     ULONG64 stackLowAddress = (ULONG64)PAL_GetStackLimit();
@@ -4547,7 +4547,7 @@ VOID DECLSPEC_NORETURN UnwindManagedExceptionPass1(PAL_SEHException& ex)
                 dispatcherContext.FunctionEntry,
                 &frameContext,
                 &handlerData,
-                (SIZE_T*)&establisherFrame,
+                &establisherFrame,
                 NULL);
 
             // Make sure that the establisher frame pointer is within stack boundaries.

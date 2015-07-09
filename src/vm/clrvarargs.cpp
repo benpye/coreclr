@@ -33,13 +33,13 @@ void VARARGS::MarshalToManagedVaList(va_list va, VARARGS *dataout)
 {
     WRAPPER_NO_CONTRACT
 
-#if !(defined(_TARGET_ARM_) && defined(PLATFORM_UNIX))
+#ifndef PLATFORM_UNIX
     _ASSERTE(dataout != NULL);
     dataout->SigPtr = SigPointer(NULL, 0);
     dataout->ArgCookie = NULL;
     dataout->ArgPtr = (BYTE*)va;
 #else
-    PORTABILITY_ASSERT("Implement for ARM");
+    PORTABILITY_ASSERT("Implement for Unix");
 #endif
 }
 
@@ -50,7 +50,7 @@ void
 VARARGS::MarshalToUnmanagedVaList(
     va_list va, DWORD cbVaListSize, const VARARGS * data)
 {
-#if !(defined(_TARGET_ARM_) && defined(PLATFORM_UNIX))
+#ifndef PLATFORM_UNIX
     BYTE * pdstbuffer = (BYTE *)va;
 
     int    remainingArgs = data->RemainingArgs;
@@ -118,6 +118,6 @@ VARARGS::MarshalToUnmanagedVaList(
         }
     }
 #else
-    PORTABILITY_ASSERT("Implement for ARM");
+    PORTABILITY_ASSERT("Implement for Unix");
 #endif
 } // VARARGS::MarshalToUnmanagedVaList

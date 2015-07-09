@@ -15,8 +15,6 @@
 #include "utilcode.h"
 #include "tls.h"
 
-typedef BYTE byte;
-
 // preferred alignment for data
 #define DATA_ALIGNMENT 4
 
@@ -1336,6 +1334,6 @@ inline size_t GetARMInstructionLength(PBYTE pInstr)
     return GetARMInstructionLength(*(WORD*)pInstr);
 }
 
-EXTERN_C void FCallMemcpy(byte* dest, byte* src, int len);
+EXTERN_C void FCallMemcpy(BYTE* dest, BYTE* src, int len);
 
 #endif // __cgencpu_h__

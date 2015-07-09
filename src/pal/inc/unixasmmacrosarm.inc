@@ -3,6 +3,28 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+.macro PATCH_LABEL Name
+        .thumb_func
+        .global C_FUNC(\Name)
+C_FUNC(\Name):
+.endm
+
+.macro LEAF_ENTRY Name, Section
+        .thumb_func
+        .global C_FUNC(\Name)
+        .type \Name, %function
+C_FUNC(\Name):
+        .cfi_startproc
+.endm
+
+.macro LEAF_END_MARKED Name, Section
+        .thumb_func
+        .global C_FUNC(\Name\()_End)
+C_FUNC(\Name\()_End):
+        .size \Name, .-\Name
+        .cfi_endproc
+.endm
+
 .macro PREPARE_EXTERNAL_VAR Name, HelperReg
         ldr \HelperReg, [pc, #C_FUNC(\Name)@GOTPCREL]
 .endm
@@ -151,4 +173,27 @@
         POP_CALLEE_SAVED_REGISTERS
         POP_ARGUMENT_REGISTERS        
         
+.endm
+
+.macro EMIT_BREAKPOINT
+        bkpt
+.endm
+
+//-----------------------------------------------------------------------------
+// Macro used to check (in debug builds only) whether the stack is 64-bit aligned (a requirement before calling
+// out into C++/OS code). Invoke this directly after your prolog (if the stack frame size is fixed) or directly
+// before a call (if you have a frame pointer and a dynamic stack). A breakpoint will be invoked if the stack
+// is misaligned.
+//
+.macro CHECK_STACK_ALIGNMENT
+
+#ifdef _DEBUG
+        push {r0}
+        add r0, sp, #4
+        tst r0, #7
+        pop {r0}
+        beq 0f
+        EMIT_BREAKPOINT
+0:
+#endif
 .endm

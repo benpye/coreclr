@@ -982,7 +982,6 @@ typedef struct _UNWIND_INFO {
     // dummy
 } UNWIND_INFO, *PUNWIND_INFO;
 
-#ifndef FEATURE_PAL
 EXTERN_C
 NTSYSAPI
 VOID
@@ -1010,19 +1009,6 @@ RtlVirtualUnwind (
     __out PDWORD EstablisherFrame,
     __inout_opt PT_KNONVOLATILE_CONTEXT_POINTERS ContextPointers
     );
-#else
-PEXCEPTION_ROUTINE
-RtlVirtualUnwind (
-    IN DWORD HandlerType,
-    IN DWORD ImageBase,
-    IN DWORD ControlPc,
-    IN PRUNTIME_FUNCTION FunctionEntry,
-    IN OUT PT_CONTEXT ContextRecord,
-    OUT PVOID *HandlerData,
-    OUT PDWORD EstablisherFrame,
-    IN OUT PT_KNONVOLATILE_CONTEXT_POINTERS ContextPointers
-    );
-#endif
 
 #define UNW_FLAG_NHANDLER 0x0
 

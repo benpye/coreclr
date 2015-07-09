@@ -16,6 +16,9 @@
 #include "unixasmmacros.inc"
 #include "asmconstants.h"
 
+.syntax unified
+.thumb
+
 // JIT_MemSet/JIT_MemCpy
 //
 // It is IMPORANT that the exception handling code is able to find these guys
@@ -28,6 +31,7 @@
 LEAF_ENTRY JIT_MemSet, _TEXT
 
         cmp r0, #0
+        it eq
         bxeq lr
         
         b C_PLTFUNC(memset)
@@ -42,6 +46,7 @@ LEAF_ENTRY JIT_MemCpy, _TEXT
 // and doesn't return a value
 
         cmp r0, #0
+        it eq
         bxeq lr
         
         b C_PLTFUNC(memcpy)

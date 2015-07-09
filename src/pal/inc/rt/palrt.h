@@ -208,6 +208,7 @@ inline void *__cdecl operator new(size_t, void *_P)
 #define NTAPI       __stdcall
 #define WINAPI      __stdcall
 #define CALLBACK    __stdcall
+#define NTSYSAPI
 
 #define _WINNT_
 
