@@ -57,9 +57,6 @@ set( JIT_SOURCES
   assertionprop.cpp
   rangecheck.cpp
   loopcloning.cpp
-  lower.cpp
-  lsra.cpp
-  simd.cpp
 )
 
 if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
@@ -70,14 +67,15 @@ if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
     lowerxarch.cpp
     codegenxarch.cpp
     simdcodegenxarch.cpp
+    lower.cpp
+    lsra.cpp
+    simd.cpp
   )
 elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   set( ARCH_SOURCES
     targetarm.cpp
     unwindarm.cpp
     emitarm.cpp
-    lowerarm.cpp
-    codegenarm.cpp
     codegenlegacy.cpp
     registerfp.cpp
   )

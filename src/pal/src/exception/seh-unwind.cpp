@@ -116,8 +116,7 @@ static void UnwindContextToWinContext(unw_cursor_t *cursor, CONTEXT *winContext)
 #endif
 }
 
-#ifdef BIT64
-static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, PDWORD64 *contextPointer)
+static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, SIZE_T **contextPointer)
 {
 #if defined(__APPLE__)
     // Returning NULL indicates that we don't have context pointers available
@@ -127,27 +126,13 @@ static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, i
     unw_get_save_loc(cursor, reg, &saveLoc);
     if (saveLoc.type == UNW_SLT_MEMORY)
     {
-        PDWORD64 pLoc = (PDWORD64)saveLoc.u.addr;
+        SIZE_T *pLoc = (SIZE_T *)saveLoc.u.addr;
         // Filter out fake save locations that point to unwContext 
-        if ((pLoc < (PDWORD64)unwContext) || ((PDWORD64)(unwContext + 1) <= pLoc))
-            *contextPointer = (PDWORD64)saveLoc.u.addr;
+        if ((pLoc < (SIZE_T *)unwContext) || ((SIZE_T *)(unwContext + 1) <= pLoc))
+            *contextPointer = (SIZE_T *)saveLoc.u.addr;
     }
 #endif
 }
-#else
-static void GetContextPointer(unw_cursor_t *cursor, unw_context_t *unwContext, int reg, PDWORD *contextPointer)
-{
-    unw_save_loc_t saveLoc;
-    unw_get_save_loc(cursor, reg, &saveLoc);
-    if (saveLoc.type == UNW_SLT_MEMORY)
-    {
-        PDWORD pLoc = (PDWORD)saveLoc.u.addr;
-        // Filter out fake save locations that point to unwContext 
-        if ((pLoc < (PDWORD)unwContext) || ((PDWORD)(unwContext + 1) <= pLoc))
-            *contextPointer = (PDWORD)saveLoc.u.addr;
-    }
-}
-#endif
 
 static void GetContextPointers(unw_cursor_t *cursor, unw_context_t *unwContext, KNONVOLATILE_CONTEXT_POINTERS *contextPointers)
 {

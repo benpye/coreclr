@@ -6883,7 +6883,7 @@ void                emitter::emitDispReg(regNumber reg, emitAttr  attr, bool add
 {
     if (isFloatReg(reg))
     {
-        char *size = (char *)(attr == EA_8BYTE ? "d" : "s");
+        const char *size = attr == EA_8BYTE ? "d" : "s";
         printf("%s%s", size, emitFloatRegName(reg, attr)+1);
     }
     else
