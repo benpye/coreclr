@@ -18,7 +18,6 @@
     LEAF_ENTRY FCallMemcpy, _TEXT
         cmp r2, #0
         
-        it eq
         beq GC_POLL
         
         ldr r3, [r0]
