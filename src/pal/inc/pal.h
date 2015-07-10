@@ -3229,6 +3229,8 @@ size_t
 PALAPI
 PAL_GetLogicalProcessorCacheSizeFromOS();
 
+#define GetLogicalProcessorCacheSizeFromOS PAL_GetLogicalProcessorCacheSizeFromOS
+
 #ifdef PLATFORM_UNIX
 
 #if defined(__FreeBSD__) && defined(_X86_)

@@ -18,15 +18,17 @@
     LEAF_ENTRY FCallMemcpy, _TEXT
         cmp r2, #0
         
-        itttt ne
-        ldrne r3, [r0]
-        ldrne r3, [r1]
+        it eq
+        beq GC_POLL
         
-        pushne {lr}
-        blxne C_FUNC(memcpy)
-        it ne
-        popne {lr}
+        ldr r3, [r0]
+        ldr r3, [r1]
+        
+        push {lr}
+        blx C_FUNC(memcpy)
+        pop {lr}
 
+GC_POLL:
         ldr r0, =g_TrapReturningThreads
         ldr r0, [r0]
         cmp r0, #0
