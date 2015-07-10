@@ -3224,6 +3224,11 @@ DWORD
 PALAPI
 PAL_GetLogicalCpuCountFromOS();
 
+PALIMPORT
+size_t
+PALAPI
+PAL_GetLogicalProcessorCacheSizeFromOS();
+
 #ifdef PLATFORM_UNIX
 
 #if defined(__FreeBSD__) && defined(_X86_)
