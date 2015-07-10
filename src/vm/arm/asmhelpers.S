@@ -38,7 +38,7 @@
         mov     r5,r0 // save pCallDescrData in r5
 
         ldr     r1, [r5,#CallDescrData__numStackSlots]
-        cbz     r1, Ldonestack
+        cbz     r1, LOCAL_LABEL(Ldonestack)
 
         // Add frame padding to ensure frame size is a multiple of 8 (a requirement of the OS ABI).
         // We push four registers (above) and numStackSlots arguments (below). If this comes to an odd number
@@ -52,19 +52,19 @@
         // from [pSrcEnd-4,pSrcEnd-8,...] to [sp-4,sp-8,...]
         ldr     r0, [r5,#CallDescrData__pSrc]
         add     r0,r0,r2
-Lstackloop:
+LOCAL_LABEL(Lstackloop):
         ldr     r2, [r0,#-4]!
         str     r2, [sp,#-4]!
         subs    r1, r1, #1
-        bne     Lstackloop
-Ldonestack:
+        bne     LOCAL_LABEL(Lstackloop)
+LOCAL_LABEL(Ldonestack):
 
         // If FP arguments are supplied in registers (r3 != NULL) then initialize all of them from the pointer
         // given in r3. Do not use "it" since it faults in floating point even when the instruction is not executed.
         ldr     r3, [r5,#CallDescrData__pFloatArgumentRegisters]
-        cbz     r3, LNoFloatingPoint
+        cbz     r3, LOCAL_LABEL(LNoFloatingPoint)
         vldm    r3, {s0-s15}
-LNoFloatingPoint:
+LOCAL_LABEL(LNoFloatingPoint):
 
         // Copy [pArgumentRegisters, ..., pArgumentRegisters + 12]
         // into r0, ..., r3
@@ -82,47 +82,47 @@ LNoFloatingPoint:
         ldr     r3, [r5,#CallDescrData__fpReturnSize]
 
         // Save FP return value if appropriate
-        cbz     r3, LFloatingPointReturnDone
+        cbz     r3, LOCAL_LABEL(LFloatingPointReturnDone)
 
         // Float return case
         // Do not use "it" since it faults in floating point even when the instruction is not executed.
         cmp     r3, #4
-        bne     LNoFloatReturn
+        bne     LOCAL_LABEL(LNoFloatReturn)
         vmov    r0, s0
-        b       LFloatingPointReturnDone
-LNoFloatReturn:
+        b       LOCAL_LABEL(LFloatingPointReturnDone)
+LOCAL_LABEL(LNoFloatReturn):
 
         // Double return case
         // Do not use "it" since it faults in floating point even when the instruction is not executed.
         cmp     r3, #8
-        bne     LNoDoubleReturn
+        bne     LOCAL_LABEL(LNoDoubleReturn)
         vmov    r0, r1, s0, s1
-        b       LFloatingPointReturnDone
-LNoDoubleReturn:
+        b       LOCAL_LABEL(LFloatingPointReturnDone)
+LOCAL_LABEL(LNoDoubleReturn):
 
         add     r2, r5, #CallDescrData__returnValue
 
         cmp     r3, #16
-        bne     LNoFloatHFAReturn
+        bne     LOCAL_LABEL(LNoFloatHFAReturn)
         vstm    r2, {s0-s3}
-        b       LReturnDone
-LNoFloatHFAReturn:
+        b       LOCAL_LABEL(LReturnDone)
+LOCAL_LABEL(LNoFloatHFAReturn):
 
         cmp     r3, #32
-        bne     LNoDoubleHFAReturn
+        bne     LOCAL_LABEL(LNoDoubleHFAReturn)
         vstm    r2, {d0-d3}
-        b       LReturnDone
-LNoDoubleHFAReturn:
+        b       LOCAL_LABEL(LReturnDone)
+LOCAL_LABEL(LNoDoubleHFAReturn):
 
         EMIT_BREAKPOINT // Unreachable
 
-LFloatingPointReturnDone:
+LOCAL_LABEL(LFloatingPointReturnDone):
 
         // Save return value into retbuf
         str     r0, [r5, #(CallDescrData__returnValue + 0)]
         str     r1, [r5, #(CallDescrData__returnValue + 4)]
 
-LReturnDone:
+LOCAL_LABEL(LReturnDone):
 
 #ifdef _DEBUG
         // trash the floating point registers to ensure that the HFA return values 
@@ -229,9 +229,9 @@ C_FUNC(JIT_TailCallHelperStub_ReturnAddress):
         ldr     r3, [r3]
         ldr     r2, [r7, #-0x0C]
         cmp     r2, r3
-        beq     GoodGSCookie
+        beq     LOCAL_LABEL(GoodGSCookie)
         bl      DoJITFailFast
-GoodGSCookie:
+LOCAL_LABEL(GoodGSCookie):
 #endif // _DEBUG
 
         //
@@ -270,14 +270,14 @@ GoodGSCookie:
 // void SinglecastDelegateInvokeStub(Delegate *pThis)
     LEAF_ENTRY SinglecastDelegateInvokeStub, _TEXT
         cmp     r0, #0
-        beq     LNullThis
+        beq     LOCAL_LABEL(LNullThis)
 
         ldr     r12, [r0, #DelegateObject___methodPtr]
         ldr     r0, [r0, #DelegateObject___target]
 
         bx      r12
 
-LNullThis:
+LOCAL_LABEL(LNullThis):
         mov     r0, #CORINFO_NullReferenceException_ASM
         b       JIT_InternalThrow
 
@@ -322,9 +322,9 @@ UMThunkStub_StackArgs = 10*4
         CHECK_STACK_ALIGNMENT
 
         bl                  GetThread
-        cbz                 r0, UMThunkStub_DoThreadSetup
+        cbz                 r0, LOCAL_LABEL(UMThunkStub_DoThreadSetup)
 
-UMThunkStub_HaveThread:
+LOCAL_LABEL(UMThunkStub_HaveThread):
         mov                 r5, r0                  // r5 = Thread *
 
         ldr                 r2, =g_TrapReturningThreads
@@ -333,9 +333,9 @@ UMThunkStub_HaveThread:
         str                 r4, [r5, #Thread__m_fPreemptiveGCDisabled]
 
         ldr                 r3, [r2]
-        cbnz                r3, UMThunkStub_DoTrapReturningThreads
+        cbnz                r3, LOCAL_LABEL(UMThunkStub_DoTrapReturningThreads)
 
-UMThunkStub_InCooperativeMode:
+LOCAL_LABEL(UMThunkStub_InCooperativeMode):
         ldr                 r12, [r7, #UMThunkStub_HiddenArg]
 
         ldr                 r0, [r5, #Thread__m_pDomain]
@@ -343,10 +343,10 @@ UMThunkStub_InCooperativeMode:
         ldr                 r0, [r0, #AppDomain__m_dwId]
         ldr                 r3, [r12, #UMEntryThunk__m_pUMThunkMarshInfo]
         cmp                 r0, r1
-        bne                 UMThunkStub_WrongAppDomain
+        bne                 LOCAL_LABEL(UMThunkStub_WrongAppDomain)
 
         ldr                 r2, [r3, #UMThunkMarshInfo__m_cbActualArgSize]
-        cbz                 r2, UMThunkStub_ArgumentsSetup
+        cbz                 r2, LOCAL_LABEL(UMThunkStub_ArgumentsSetup)
 
         add                 r0, r7, #UMThunkStub_StackArgs // Source pointer
         add                 r0, r0, r2
@@ -355,13 +355,13 @@ UMThunkStub_InCooperativeMode:
         and                 r2, r2, #4      // Align the stack
         sub                 sp, sp, r2
 
-UMThunkStub_StackLoop:
+LOCAL_LABEL(UMThunkStub_StackLoop):
         ldr                 r2, [r0,#-4]!
         str                 r2, [sp,#-4]!
         subs                r1, r1, #1
-        bne                 UMThunkStub_StackLoop
+        bne                 LOCAL_LABEL(UMThunkStub_StackLoop)
 
-UMThunkStub_ArgumentsSetup:
+LOCAL_LABEL(UMThunkStub_ArgumentsSetup):
         ldr                 r4, [r3, #UMThunkMarshInfo__m_pILStub]
 
         // reload argument registers
@@ -371,7 +371,7 @@ UMThunkStub_ArgumentsSetup:
 
         blx                 r4
 
-UMThunkStub_PostCall:
+LOCAL_LABEL(UMThunkStub_PostCall):
         mov                 r4, 0
         str                 r4, [r5, #Thread__m_fPreemptiveGCDisabled]
 
@@ -379,15 +379,15 @@ UMThunkStub_PostCall:
         add sp, sp, #(4 * 5)
         pop {r4,r5,r7,r11,pc}
 
-UMThunkStub_DoThreadSetup:
+LOCAL_LABEL(UMThunkStub_DoThreadSetup):
         sub                 sp, #SIZEOF__FloatArgumentRegisters
         vstm                sp, {d0-d7}
         bl                  CreateThreadBlockThrow
         vldm                sp, {d0-d7}
         add                 sp, #SIZEOF__FloatArgumentRegisters
-        b                   UMThunkStub_HaveThread
+        b                   LOCAL_LABEL(UMThunkStub_HaveThread)
 
-UMThunkStub_DoTrapReturningThreads:
+LOCAL_LABEL(UMThunkStub_DoTrapReturningThreads):
         sub                 sp, #SIZEOF__FloatArgumentRegisters
         vstm                sp, {d0-d7}
         mov                 r0, r5              // Thread* pThread
@@ -395,9 +395,9 @@ UMThunkStub_DoTrapReturningThreads:
         bl                  UMThunkStubRareDisableWorker
         vldm                sp, {d0-d7}
         add                 sp, #SIZEOF__FloatArgumentRegisters
-        b                   UMThunkStub_InCooperativeMode
+        b                   LOCAL_LABEL(UMThunkStub_InCooperativeMode)
 
-UMThunkStub_WrongAppDomain:
+LOCAL_LABEL(UMThunkStub_WrongAppDomain):
         sub                 sp, #SIZEOF__FloatArgumentRegisters
         vstm                sp, {d0-d7}
 
@@ -412,7 +412,7 @@ UMThunkStub_WrongAppDomain:
 
         // Restore FP return value or HFA.
         vldm                sp, {d0-d3}
-        b                   UMThunkStub_PostCall
+        b                   LOCAL_LABEL(UMThunkStub_PostCall)
 
         NESTED_END UMThunkStub,_TEXT
 
@@ -439,7 +439,7 @@ UMThunkStub_WrongAppDomain:
         ldr                 r3, [r12, #UMEntryThunk__m_pUMThunkMarshInfo]
         
         ldr                 r2, [r3, #UMThunkMarshInfo__m_cbActualArgSize]
-        cbz                 r2, UM2MThunk_WrapperHelper_ArgumentsSetup
+        cbz                 r2, LOCAL_LABEL(UM2MThunk_WrapperHelper_ArgumentsSetup)
 
         add                 r0, r5, #UMThunkStub_StackArgs // Source pointer
         add                 r0, r0, r2
@@ -448,13 +448,13 @@ UMThunkStub_WrongAppDomain:
         and                 r2, r2, #4      // Align the stack
         sub                 sp, sp, r2
 
-UM2MThunk_WrapperHelper_StackLoop:
+LOCAL_LABEL(UM2MThunk_WrapperHelper_StackLoop):
         ldr                 r2, [r0,#-4]!
         str                 r2, [sp,#-4]!
         subs                r1, r1, #1
-        bne                 UM2MThunk_WrapperHelper_StackLoop
+        bne                 LOCAL_LABEL(UM2MThunk_WrapperHelper_StackLoop)
 
-UM2MThunk_WrapperHelper_ArgumentsSetup:
+LOCAL_LABEL(UM2MThunk_WrapperHelper_ArgumentsSetup):
         ldr                 r4, [r3, #UMThunkMarshInfo__m_pILStub]
 
         // reload floating point registers
@@ -645,7 +645,7 @@ ThePreStubPatchLabel:
         // If machine state is invalid, then simply exit
         ldr r1, [r0, #MachState__isValid]
         cmp r1, #0
-        beq Done
+        beq LOCAL_LABEL(Done)
 
         RestoreRegMS 4, R4
         RestoreRegMS 5, R5
@@ -655,7 +655,7 @@ ThePreStubPatchLabel:
         RestoreRegMS 9, R9
         RestoreRegMS 10, R10
         RestoreRegMS 11, R11
-Done:
+LOCAL_LABEL(Done):
         // Its imperative that the return value of HelperMethodFrameRestoreState is zero
         // as it is used in the state machine to loop until it becomes zero.
         // Refer to HELPER_METHOD_FRAME_END macro for details.
@@ -750,26 +750,26 @@ RedirectedHandledJITCaseFor\reason\()_StubEnd:
     subs        r12,sp,r4
     mrc         p15,#0,r4,c13,c0,#2 // get TEB *
     ldr         r4,[r4,#8]          // get Stack limit
-    bcc         checkStack_neg      // if r12 is less then 0 set it to 0
-checkStack_label1:
+    bcc         LOCAL_LABEL(checkStack_neg) // if r12 is less then 0 set it to 0
+LOCAL_LABEL(checkStack_label1):
     cmp         r12, r4
     bcc         stackProbe          // must probe to extend guardpage if r12 is beyond stackLimit
     sub         r4, sp, r12         // restore value of r4
     bx lr
-checkStack_neg:
+LOCAL_LABEL(checkStack_neg):
     mov         r12, #0
-    b           checkStack_label1
+    b           LOCAL_LABEL(checkStack_label1)
     NESTED_END checkStack, _TEXT
 
     NESTED_ENTRY stackProbe, _TEXT, NoHandler
     push {r5,r6}
     mov         r6, r12
     bfc         r6, #0, #0xc  // align down (4K)
-stackProbe_loop:
+LOCAL_LABEL(stackProbe_loop):
     sub         r4,r4,#0x1000 // dec stack Limit by 4K as page size is 4K
     ldr         r5,[r4]       // try to read ... this should move the guard page
     cmp         r4,r6
-    bne         stackProbe_loop
+    bne         LOCAL_LABEL(stackProbe_loop)
     pop {r5,r6}
     sub r4,sp,r12
     bx lr
@@ -934,11 +934,11 @@ stackProbe_loop:
     add     r2, r0, #DomainLocalModule__m_pDataBlob
     ldrb    r2, [r2, r1]
     tst     r2, #1
-    beq      CallCppHelper1
+    beq     LOCAL_LABEL(CallCppHelper1)
 
     bx      lr
 
-CallCppHelper1:
+LOCAL_LABEL(CallCppHelper1):
     // Tail call JIT_GetSharedNonGCStaticBase_Helper
     b     JIT_GetSharedNonGCStaticBase_Helper
     LEAF_END JIT_GetSharedNonGCStaticBase_SingleAppDomain, _TEXT
@@ -962,12 +962,12 @@ CallCppHelper1:
     add     r2, r0, #DomainLocalModule__m_pDataBlob
     ldrb    r2, [r2, r1]
     tst     r2, #1
-    beq      CallCppHelper3
+    beq     LOCAL_LABEL(CallCppHelper3)
 
     ldr     r0, [r0, #DomainLocalModule__m_pGCStatics]
     bx lr
 
-CallCppHelper3:
+LOCAL_LABEL(CallCppHelper3):
     // Tail call Jit_GetSharedGCStaticBase_Helper
     b     JIT_GetSharedGCStaticBase_Helper
     LEAF_END JIT_GetSharedGCStaticBase_SingleAppDomain, _TEXT
@@ -991,15 +991,15 @@ CallCppHelper3:
     // We retain arguments as they were passed and use r0 == array// r1 == idx// r2 == val
 
     // check for null array
-    cbz     r0, ThrowNullReferenceException
+    cbz     r0, LOCAL_LABEL(ThrowNullReferenceException)
 
     // idx bounds check
     ldr     r3,[r0,#ArrayBase__m_NumComponents]
     cmp     r3,r1
-    bls     ThrowIndexOutOfRangeException
+    bls     LOCAL_LABEL(ThrowIndexOutOfRangeException)
 
     // fast path to null assignment (doesn't need any write-barriers)
-    cbz     r2, AssigningNull
+    cbz     r2, LOCAL_LABEL(AssigningNull)
 
     // Verify the array-type and val-type matches before writing
     ldr     r12, [r0] // r12 = array MT
@@ -1017,18 +1017,18 @@ CallCppHelper3:
     // array type and val type do not exactly match. Raise frame and do detailed match
     b       JIT_Stelem_Ref_NotExactMatch   
 
-AssigningNull:
+LOCAL_LABEL(AssigningNull):
     // Assigning null doesn't need write barrier
     adds    r0, r1, LSL #2               // r0 = r0 + (r1 x 4) = array->m_array[idx]
     str     r2, [r0, #PtrArray__m_Array] // array->m_array[idx] = val
     bx      lr
    
-ThrowNullReferenceException:
+LOCAL_LABEL(ThrowNullReferenceException):
     // Tail call JIT_InternalThrow(NullReferenceException)
     ldr     r0, =CORINFO_NullReferenceException_ASM
     b       JIT_InternalThrow
 
-ThrowIndexOutOfRangeException:
+LOCAL_LABEL(ThrowIndexOutOfRangeException):
     // Tail call JIT_InternalThrow(NullReferenceException)
     ldr     r0, =CORINFO_IndexOutOfRangeException_ASM
     b       JIT_InternalThrow
@@ -1052,15 +1052,15 @@ ThrowIndexOutOfRangeException:
     mov     r0, r2
     bl      ObjIsInstanceOfNoGC
     cmp     r0, TypeHandle_CanCast 
-    beq     DoWrite             // ObjIsInstance returned TypeHandle::CanCast
+    beq     LOCAL_LABEL(DoWrite)             // ObjIsInstance returned TypeHandle::CanCast
 
     // check via raising frame
-NeedFrame:
+LOCAL_LABEL(NeedFrame):
     mov     r1, sp              // r1 = &array
     adds    r0, sp, #8          // r0 = &val
     bl      ArrayStoreCheck     // ArrayStoreCheck(&val, &array)
  
-DoWrite:
+LOCAL_LABEL(DoWrite):
     pop  {r0-r2}
     pop  {lr}
     b JIT_Stelem_DoWrite
