@@ -68,13 +68,11 @@ add_compile_options(-fPIC)
 
 if(PAL_CMAKE_PLATFORM_ARCH_AMD64)
   set(ARCH_SOURCES
-    arch/i386/context.cpp
     arch/i386/context2.S
     arch/i386/processor.cpp
   )
 elseif(PAL_CMAKE_PLATFORM_ARCH_ARM)
   set(ARCH_SOURCES
-    arch/arm/context.cpp
     arch/arm/context2.S
     arch/arm/processor.cpp
   )
@@ -179,6 +177,7 @@ set(SOURCES
   synchmgr/synchcontrollers.cpp
   synchmgr/synchmanager.cpp
   synchmgr/wait.cpp
+  thread/context.cpp
   thread/process.cpp
   thread/thread.cpp
   thread/threadsusp.cpp

@@ -176,7 +176,7 @@ C_FUNC(\Name\()_End):
 .endm
 
 .macro EMIT_BREAKPOINT
-        bkpt
+        .inst.w 0xde01
 .endm
 
 //-----------------------------------------------------------------------------

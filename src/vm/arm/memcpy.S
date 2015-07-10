@@ -16,9 +16,17 @@
 //
 
     LEAF_ENTRY FCallMemcpy, _TEXT
-        push {lr}
-        blx C_FUNC(memcpy)
-        pop {lr}
+        cmp r2, #0
+        
+        itt ne
+        ldrne r3, [r0]
+        ldrne r3, [r1]
+        
+        ittt ne
+        pushne {lr}
+        blxne C_FUNC(memcpy)
+        popne {lr}
+
         ldr r0, =g_TrapReturningThreads
         ldr r0, [r0]
         cmp r0, #0
