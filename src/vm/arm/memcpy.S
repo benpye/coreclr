@@ -18,7 +18,7 @@
     LEAF_ENTRY FCallMemcpy, _TEXT
         cmp r2, #0
         
-        beq GC_POLL
+        beq LOCAL_LABEL(GC_POLL)
         
         ldr r3, [r0]
         ldr r3, [r1]
@@ -27,7 +27,7 @@
         blx C_FUNC(memcpy)
         pop {lr}
 
-GC_POLL:
+LOCAL_LABEL(GC_POLL):
         ldr r0, =g_TrapReturningThreads
         ldr r0, [r0]
         cmp r0, #0
