@@ -6690,7 +6690,7 @@ static bool        insAlwaysSetFlags(instruction ins)
         break;
         
     default:
-        unreached();
+        break;
     }
     return result;
 }

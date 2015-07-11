@@ -207,8 +207,11 @@ INT Silent_PAL_vsnprintf(LPSTR Buffer, INT Count, LPCSTR Format, va_list ap)
                             return -1;
                         }
                     }                                     
-
-                     TempInt = PAL__vsnprintf(BufferPtr, TempCount, TempBuff, ap);
+                    va_list apcopy;
+                    va_copy(apcopy, ap);
+                    TempInt = PAL__vsnprintf(BufferPtr, TempCount, TempBuff, apcopy);
+                    va_end(apcopy);
+                    PAL_printf_arg_remover((va_list *)&ap, Precision, Type, Prefix);
                 }
 
                 if (TempInt < 0 || static_cast<size_t>(TempInt) >= TempCount) /* buffer not long enough */
@@ -405,7 +408,11 @@ int Silent_PAL_vfprintf(PAL_FILE *stream, const char *format, va_list ap)
                 }
                 else
                 {
-                    TempInt = PAL_vfprintf(stream, TempBuff, ap);
+                    va_list apcopy;
+                    va_copy(apcopy, ap);
+                    TempInt = PAL_vfprintf(stream, TempBuff, apcopy);
+                    va_end(apcopy);
+                    PAL_printf_arg_remover((va_list *)&ap, Precision, Type, Prefix);
                 }
 
                 if (-1 != TempInt)
