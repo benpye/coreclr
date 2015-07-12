@@ -1256,59 +1256,60 @@ emitter::insSize   emitter::emitInsSize(insFormat  insFmt)
     unsigned uval32 = (unsigned) val32;
     unsigned imm8   = uval32 & 0xff;
     unsigned encode = imm8 >> 7;
+    unsigned imm32a;
+    unsigned imm32b;
+    unsigned imm32c;
+    unsigned mask32;
+    unsigned temp;
 
     /* encode = 0000x */
     if (imm8 == uval32)
     {
         goto DONE;
     }
+
+    imm32a = (imm8 << 16) | imm8;
+    /* encode = 0001x */
+    if (imm32a == uval32)
     {
-        unsigned imm32a = (imm8 << 16) | imm8;
-        /* encode = 0001x */
-        if (imm32a == uval32)
+        encode += 2;
+        goto DONE;
+    }
+
+    imm32b = (imm32a << 8);
+    /* encode = 0010x */
+    if (imm32b == uval32)
+    {
+        encode += 4;
+        goto DONE;
+    }
+
+    imm32c = (imm32a | imm32b);
+    /* encode = 0011x */
+    if (imm32c == uval32)
+    {
+        encode +=6;
+        goto DONE;
+    }
+
+    mask32 = 0x00000ff;
+
+    encode = 31;  /* 11111 */
+    do {
+        mask32 <<= 1;
+        temp = uval32 & ~mask32;
+        if (temp == 0)
         {
-            encode += 2;
+            imm8 = (uval32 & mask32) >> (32 - encode);
+            assert((imm8 & 0x80) != 0);
             goto DONE;
         }
-        {
-            unsigned imm32b = (imm32a << 8);
-            /* encode = 0010x */
-            if (imm32b == uval32)
-            {
-                encode += 4;
-                goto DONE;
-            }
-            {
-                unsigned imm32c = (imm32a | imm32b);
-                /* encode = 0011x */
-                if (imm32c == uval32)
-                {
-                    encode +=6;
-                    goto DONE;
-                }
-                {
-                    unsigned mask32 = 0x00000ff;
-                    unsigned temp;
-                
-                    encode = 31;  /* 11111 */
-                    do {
-                        mask32 <<= 1;
-                        temp = uval32 & ~mask32;
-                        if (temp == 0)
-                        {
-                            imm8 = (uval32 & mask32) >> (32 - encode);
-                            assert((imm8 & 0x80) != 0);
-                            goto DONE;
-                        }
-                        encode--;
-                    } while (encode >= 8);
-                
-                    assert(!"encodeModImmConst failed!");
-                    return BAD_CODE;
-                }
-            }
-        }
-    }
+        encode--;
+    } while (encode >= 8);
+
+    assert(!"encodeModImmConst failed!");
+    return BAD_CODE;
+
 DONE:
     unsigned result = (encode << 7) | (imm8 & 0x7f);
     assert(result <= 0x0fff);
