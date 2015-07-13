@@ -134,7 +134,7 @@ C_FUNC(\Name\()_End):
 
         __PWTB_StackAlloc = __PWTB_TransitionBlock
 
-        .ifc \pushArgRegs, DoNotPushArgRegs
+        .ifnc \pushArgRegs, DoNotPushArgRegs
                 PUSH_ARGUMENT_REGISTERS
         .endif
 
@@ -147,7 +147,7 @@ C_FUNC(\Name\()_End):
                 vstm r6, {d0-d7}
         .endif
         
-        //CHECK_STACK_ALIGNMENT
+        CHECK_STACK_ALIGNMENT
         
         END_PROLOGUE
 

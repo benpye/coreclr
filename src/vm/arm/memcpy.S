@@ -31,6 +31,10 @@ LOCAL_LABEL(GC_POLL):
         ldr r0, =g_TrapReturningThreads
         ldr r0, [r0]
         cmp r0, #0
-        bne FCallMemCpy_GCPoll
+        beq LOCAL_LABEL(Return)
+        push {lr}
+        blx C_FUNC(FCallMemCpy_GCPoll)
+        pop {lr}
+LOCAL_LABEL(Return):
         bx lr
     LEAF_END FCallMemcpy, _TEXT

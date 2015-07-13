@@ -1484,9 +1484,6 @@ void StubLinkerCPU::ThumbEmitGetThread(TLSACCESSMODE mode, ThumbReg dest)
         }
     }
     else
-#else
-    DWORD idxThread = 0;
-#endif
     {
         ThumbEmitMovConstant(ThumbReg(0), idxThread);
 
@@ -1502,6 +1499,16 @@ void StubLinkerCPU::ThumbEmitGetThread(TLSACCESSMODE mode, ThumbReg dest)
             ThumbEmitMovRegReg(dest, ThumbReg(0));
         }
     }
+#else
+    ThumbEmitMovConstant(ThumbReg(0), (TADDR)GetThread);
+
+    ThumbEmitCallRegister(ThumbReg(0));
+
+    if (dest != ThumbReg(0))
+    {
+        ThumbEmitMovRegReg(dest, ThumbReg(0));
+    }
+#endif
 }
 #endif // CROSSGEN_COMPILE
 
