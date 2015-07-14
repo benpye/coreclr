@@ -143,23 +143,23 @@ void PAL_printf_arg_remover(va_list *ap, INT Precision, INT Type, INT Prefix)
     if (PRECISION_STAR == Precision ||
         PRECISION_INVALID == Precision)
     {
-        int i = va_arg(*ap, int);
+        (void)va_arg(*ap, int);
     }
     if (Type == PFF_TYPE_FLOAT)
     {
-        double d = va_arg(*ap, double);
+        (void)va_arg(*ap, double);
     }
     else if (Type == PFF_TYPE_INT && Prefix == PFF_PREFIX_LONGLONG)
     {
-        INT64 i64 = va_arg(*ap, INT64);
+        (void)va_arg(*ap, INT64);
     }
     else if (Type == PFF_TYPE_INT || Type == PFF_TYPE_CHAR)
     {
-        int i = va_arg(*ap, int);
+        (void)va_arg(*ap, int);
     }
     else
     {
-        void *p = va_arg(*ap, void *);
+        (void)va_arg(*ap, void *);
     }
 }
 
