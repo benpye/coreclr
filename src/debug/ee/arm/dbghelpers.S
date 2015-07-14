@@ -32,7 +32,7 @@ NESTED_ENTRY FuncEvalHijack, _TEXT, FuncEvalHijackPersonalityRoutine
     // effective NOP to terminate unwind
     mov r2, r2
 
-    add sp, sp, #8
+    free_stack 8
     bx r0
 
 NESTED_END FuncEvalHijack, _TEXT
