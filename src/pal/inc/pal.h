@@ -195,6 +195,14 @@ extern "C" {
 
 #endif // _MSC_VER
 
+#ifndef FORCEINLINE
+#if _MSC_VER < 1200
+#define FORCEINLINE inline
+#else
+#define FORCEINLINE __forceinline
+#endif
+#endif
+
 #ifdef _M_ALPHA
 
 typedef struct {

@@ -948,11 +948,7 @@ typedef struct _DISPATCHER_CONTEXT {
                                                             
 // This function returns the length of a function using the new unwind info on arm.
 // Taken from minkernel\ntos\rtl\arm\ntrtlarm.h.
-#ifdef _MSC_VER_
 FORCEINLINE
-#else
-inline
-#endif
 ULONG
 RtlpGetFunctionEndAddress (
     __in PRUNTIME_FUNCTION FunctionEntry,
