@@ -73,13 +73,14 @@ if(CLR_CMAKE_PLATFORM_ARCH_AMD64)
   )
 elseif(CLR_CMAKE_PLATFORM_ARCH_ARM)
   set( ARCH_SOURCES
-    targetarm.cpp
-    unwindarm.cpp
     emitarm.cpp
-    codegenlegacy.cpp
-    registerfp.cpp
+    targetarm.cpp
+    lowerarm.cpp
+    codegenarm.cpp
+    unwindarm.cpp
+    lower.cpp
+    lsra.cpp
   )
-  add_definitions(-DLEGACY_BACKEND) 
 else()
   message(FATAL_ERROR "Only ARM and AMD64 is supported")
 endif()
