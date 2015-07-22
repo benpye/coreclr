@@ -27,7 +27,7 @@ NESTED_ENTRY FuncEvalHijack, _TEXT, FuncEvalHijackPersonalityRoutine
     CHECK_STACK_ALIGNMENT
 
     // FuncEvalHijackWorker returns the address we should jump to. 
-    bl      FuncEvalHijackWorker
+    bl      C_FUNC(FuncEvalHijackWorker)
 
     // effective NOP to terminate unwind
     mov r2, r2
@@ -53,7 +53,7 @@ NESTED_ENTRY ExceptionHijack, _TEXT, ExceptionHijackPersonalityRoutine
     CHECK_STACK_ALIGNMENT
 
     // make the call
-    bl ExceptionHijackWorker
+    bl C_FUNC(ExceptionHijackWorker)
 
     // effective NOP to terminate unwind
     mov r3, r3

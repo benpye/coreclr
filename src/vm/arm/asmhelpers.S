@@ -212,7 +212,7 @@ LOCAL_LABEL(LReturnDone):
         // Here's the pretend call (make it real so the unwinder
         // doesn't think we're in the prolog)
         //
-        bl      TailCallHelperStub
+        bl      C_FUNC(TailCallHelperStub)
         //
         // with the real return address pointing to this real epilog
         //
@@ -230,7 +230,7 @@ C_FUNC(JIT_TailCallHelperStub_ReturnAddress):
         ldr     r2, [r7, #-0x0C]
         cmp     r2, r3
         beq     LOCAL_LABEL(GoodGSCookie)
-        bl      DoJITFailFast
+        bl      C_FUNC(DoJITFailFast)
 LOCAL_LABEL(GoodGSCookie):
 #endif // _DEBUG
 
@@ -279,7 +279,7 @@ LOCAL_LABEL(GoodGSCookie):
 
 LOCAL_LABEL(LNullThis):
         mov     r0, #CORINFO_NullReferenceException_ASM
-        b       JIT_InternalThrow
+        b       C_FUNC(JIT_InternalThrow)
 
     LEAF_END SinglecastDelegateInvokeStub, _TEXT
 
@@ -294,7 +294,7 @@ LOCAL_LABEL(LNullThis):
         CHECK_STACK_ALIGNMENT
 
         mov     r0, r12
-        bl      TheUMEntryPrestubWorker
+        bl      C_FUNC(TheUMEntryPrestubWorker)
 
         // Record real target address in r12.
         mov     r12, r0
@@ -321,7 +321,7 @@ UMThunkStub_StackArgs = 10*4
 
         CHECK_STACK_ALIGNMENT
 
-        bl                  GetThread
+        bl                  C_FUNC(GetThread)
         cbz                 r0, LOCAL_LABEL(UMThunkStub_DoThreadSetup)
 
 LOCAL_LABEL(UMThunkStub_HaveThread):
@@ -382,7 +382,7 @@ LOCAL_LABEL(UMThunkStub_PostCall):
 LOCAL_LABEL(UMThunkStub_DoThreadSetup):
         sub                 sp, #SIZEOF__FloatArgumentRegisters
         vstm                sp, {d0-d7}
-        bl                  CreateThreadBlockThrow
+        bl                  C_FUNC(CreateThreadBlockThrow)
         vldm                sp, {d0-d7}
         add                 sp, #SIZEOF__FloatArgumentRegisters
         b                   LOCAL_LABEL(UMThunkStub_HaveThread)
@@ -392,7 +392,7 @@ LOCAL_LABEL(UMThunkStub_DoTrapReturningThreads):
         vstm                sp, {d0-d7}
         mov                 r0, r5              // Thread* pThread
         ldr                 r1, [r7, #UMThunkStub_HiddenArg]  // UMEntryThunk* pUMEntry
-        bl                  UMThunkStubRareDisableWorker
+        bl                  C_FUNC(UMThunkStubRareDisableWorker)
         vldm                sp, {d0-d7}
         add                 sp, #SIZEOF__FloatArgumentRegisters
         b                   LOCAL_LABEL(UMThunkStub_InCooperativeMode)
@@ -404,7 +404,7 @@ LOCAL_LABEL(UMThunkStub_WrongAppDomain):
         ldr                 r0, [r7, #UMThunkStub_HiddenArg]  // UMEntryThunk* pUMEntry
         mov                 r2, r7              // void * pArgs
         // remaining arguments are unused
-        bl                  UM2MDoADCallBack
+        bl                  C_FUNC(UM2MDoADCallBack)
 
         // Restore non-FP return value.
         ldr                 r0, [r7, #0]
@@ -495,7 +495,7 @@ LOCAL_LABEL(UM2MThunk_WrapperHelper_ArgumentsSetup):
         add         r0, sp, #__PWTB_TransitionBlock // pTransitionBlock
         mov         r1, r12                         // pMethodDesc
 
-        bl          PreStubWorker
+        bl          C_FUNC(PreStubWorker)
 
         mov         r12, r0
 
@@ -524,7 +524,7 @@ ThePreStubPatchLabel:
         CHECK_STACK_ALIGNMENT
 
         mov     r0, r12
-        bl      NDirectImportWorker
+        bl      C_FUNC(NDirectImportWorker)
         mov     r12, r0
 
         vpop {d0-d7}
@@ -555,7 +555,7 @@ ThePreStubPatchLabel:
         add     r12,r0,r1,lsl #2
 
         pop {r0-r1}
-        b ThePreStub
+        b C_FUNC(ThePreStub)
 
         NESTED_END PrecodeFixupThunk, _TEXT
 
@@ -574,7 +574,7 @@ ThePreStubPatchLabel:
         bic         r1, r4, #3          // indirection cell
         and         r3, r4, #3          // flags
 
-        bl          VSD_ResolveWorker
+        bl          C_FUNC(VSD_ResolveWorker)
 
         mov         r12, r0
 
@@ -588,7 +588,7 @@ ThePreStubPatchLabel:
         NESTED_ENTRY ResolveWorkerChainLookupAsmStub, _TEXT, NoHandler
 
         // ARMSTUB TODO: implement chained lookup
-        b           ResolveWorkerAsmStub
+        b           C_FUNC(ResolveWorkerAsmStub)
 
         NESTED_END ResolveWorkerChainLookupAsmStub, _TEXT
 
@@ -753,7 +753,7 @@ RedirectedHandledJITCaseFor\reason\()_StubEnd:
     bcc         LOCAL_LABEL(checkStack_neg) // if r12 is less then 0 set it to 0
 LOCAL_LABEL(checkStack_label1):
     cmp         r12, r4
-    bcc         stackProbe          // must probe to extend guardpage if r12 is beyond stackLimit
+    bcc         C_FUNC(stackProbe)  // must probe to extend guardpage if r12 is beyond stackLimit
     sub         r4, sp, r12         // restore value of r4
     bx lr
 LOCAL_LABEL(checkStack_neg):
@@ -813,7 +813,7 @@ LOCAL_LABEL(stackProbe_loop):
     // Call the helper in the VM to perform the actual fixup
     // and tell us where to tail call. R0 already contains
     // the this pointer.
-    bl VirtualMethodFixupWorker
+    bl C_FUNC(VirtualMethodFixupWorker)
 
     // On return, R0 contains the target to tailcall to
     mov         r12, r0
@@ -856,7 +856,7 @@ LOCAL_LABEL(stackProbe_loop):
 
     mov         r2, #0  // sectionIndex
     mov         r3, #0  // pModule
-    bl          ExternalMethodFixupWorker
+    bl          C_FUNC(ExternalMethodFixupWorker)
 
     // mov the address we patched to in R12 so that we can tail call to it
     mov         r12, r0
@@ -889,7 +889,7 @@ LOCAL_LABEL(stackProbe_loop):
     mov         r2, #0  // sectionIndex
     mov         r3, #0  // pModule
 
-    bl          StubDispatchFixupWorker
+    bl          C_FUNC(StubDispatchFixupWorker)
 
     // mov the address we patched to in R12 so that we can tail call to it
     mov         r12, r0
@@ -912,7 +912,7 @@ LOCAL_LABEL(stackProbe_loop):
 
     CHECK_STACK_ALIGNMENT
 
-    bl          JIT_RareDisableHelperWorker
+    bl          C_FUNC(JIT_RareDisableHelperWorker)
 
     vpop {d0-d3}
     pop {r0-r1, r11, pc}
@@ -940,7 +940,7 @@ LOCAL_LABEL(stackProbe_loop):
 
 LOCAL_LABEL(CallCppHelper1):
     // Tail call JIT_GetSharedNonGCStaticBase_Helper
-    b     JIT_GetSharedNonGCStaticBase_Helper
+    b     C_FUNC(JIT_GetSharedNonGCStaticBase_Helper)
     LEAF_END JIT_GetSharedNonGCStaticBase_SingleAppDomain, _TEXT
 
 
@@ -969,7 +969,7 @@ LOCAL_LABEL(CallCppHelper1):
 
 LOCAL_LABEL(CallCppHelper3):
     // Tail call Jit_GetSharedGCStaticBase_Helper
-    b     JIT_GetSharedGCStaticBase_Helper
+    b     C_FUNC(JIT_GetSharedGCStaticBase_Helper)
     LEAF_END JIT_GetSharedGCStaticBase_SingleAppDomain, _TEXT
 
 
@@ -1006,16 +1006,16 @@ LOCAL_LABEL(CallCppHelper3):
     ldr     r3, [r2] // r3 = val->GetMethodTable()
     ldr     r12, [r12, #MethodTable__m_ElementType] // array->GetArrayElementTypeHandle()
     cmp     r3, r12
-    beq     JIT_Stelem_DoWrite
+    beq     C_FUNC(JIT_Stelem_DoWrite)
 
     // Types didnt match but allow writing into an array of objects
     ldr     r3, =g_pObjectClass
     ldr     r3, [r3]  // r3 = *g_pObjectClass
     cmp     r3, r12   // array type matches with Object*
-    beq     JIT_Stelem_DoWrite
+    beq     C_FUNC(JIT_Stelem_DoWrite)
 
     // array type and val type do not exactly match. Raise frame and do detailed match
-    b       JIT_Stelem_Ref_NotExactMatch   
+    b       C_FUNC(JIT_Stelem_Ref_NotExactMatch)
 
 LOCAL_LABEL(AssigningNull):
     // Assigning null doesn't need write barrier
@@ -1026,12 +1026,12 @@ LOCAL_LABEL(AssigningNull):
 LOCAL_LABEL(ThrowNullReferenceException):
     // Tail call JIT_InternalThrow(NullReferenceException)
     ldr     r0, =CORINFO_NullReferenceException_ASM
-    b       JIT_InternalThrow
+    b       C_FUNC(JIT_InternalThrow)
 
 LOCAL_LABEL(ThrowIndexOutOfRangeException):
     // Tail call JIT_InternalThrow(NullReferenceException)
     ldr     r0, =CORINFO_IndexOutOfRangeException_ASM
-    b       JIT_InternalThrow
+    b       C_FUNC(JIT_InternalThrow)
 
     LEAF_END JIT_Stelem_Ref, _TEXT
 
@@ -1050,20 +1050,20 @@ LOCAL_LABEL(ThrowIndexOutOfRangeException):
     // call ObjIsInstanceOfNoGC(val, array->GetArrayElementTypeHandle())
     mov     r1, r12 // array->GetArrayElementTypeHandle()
     mov     r0, r2
-    bl      ObjIsInstanceOfNoGC
+    bl      C_FUNC(ObjIsInstanceOfNoGC)
     cmp     r0, TypeHandle_CanCast 
     beq     LOCAL_LABEL(DoWrite)             // ObjIsInstance returned TypeHandle::CanCast
 
     // check via raising frame
 LOCAL_LABEL(NeedFrame):
-    mov     r1, sp              // r1 = &array
-    adds    r0, sp, #8          // r0 = &val
-    bl      ArrayStoreCheck     // ArrayStoreCheck(&val, &array)
+    mov     r1, sp                  // r1 = &array
+    adds    r0, sp, #8              // r0 = &val
+    bl      C_FUNC(ArrayStoreCheck) // ArrayStoreCheck(&val, &array)
  
 LOCAL_LABEL(DoWrite):
     pop  {r0-r2}
     pop  {lr}
-    b JIT_Stelem_DoWrite
+    b C_FUNC(JIT_Stelem_DoWrite)
 
     NESTED_END JIT_Stelem_Ref_NotExactMatch, _TEXT
 
@@ -1078,7 +1078,7 @@ LOCAL_LABEL(DoWrite):
 
     // Branch to the write barrier (which is already correctly overwritten with
     // single or multi-proc code based on the current CPU
-    b       JIT_WriteBarrier
+    b       C_FUNC(JIT_WriteBarrier)
 
     LEAF_END JIT_Stelem_DoWrite, _TEXT
     
@@ -1284,7 +1284,7 @@ DelayLoad_MethodCall:
     mov         r2, r6          // sectionIndex
     mov         r3, r5          // pModule
 
-    bl          ExternalMethodFixupWorker
+    bl          C_FUNC(ExternalMethodFixupWorker)
 
     // mov the address we patched to in R12 so that we can tail call to it
     mov         r12, r0
@@ -1292,7 +1292,7 @@ DelayLoad_MethodCall:
     EPILOG_WITH_TRANSITION_BLOCK_TAILCALL
 
     // Share the patch label
-    b ExternalMethodFixupPatchLabel
+    b C_FUNC(ExternalMethodFixupPatchLabel)
 
     NESTED_END DelayLoad_MethodCall_FakeProlog, _TEXT
 
@@ -1333,7 +1333,7 @@ DelayLoad_Helper\suffix:
         mov         r4, \frameFlags
         str         r4, [sp,#0]
 
-        bl          DynamicHelperWorker
+        bl          C_FUNC(DynamicHelperWorker)
 
         cbnz        r0, 0f
         ldr         r0, [sp,#(__PWTB_TransitionBlock+9*4)]  // The result is stored in the argument area of the transition block

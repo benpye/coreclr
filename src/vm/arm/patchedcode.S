@@ -31,7 +31,7 @@
         .align 4
     LEAF_ENTRY ClrFlsGetBlock, _TEXT
         // This will be overwritten at runtime with optimized ClrFlsGetBlock implementation
-        b       GetTLSDummy
+        b       C_FUNC(GetTLSDummy)
         // Just allocate space that will be filled in at runtime
         .space (TLS_GETTER_MAX_SIZE_ASM - 2)
     LEAF_END ClrFlsGetBlock, _TEXT

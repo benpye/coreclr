@@ -64,7 +64,7 @@ OFFSET_OF_FRAME=(4 + SIZEOF__GSCookie)
         // stack must be 8 byte aligned
         CHECK_STACK_ALIGNMENT       
         
-        bl            \TARGET
+        bl            C_FUNC(\TARGET)
 
         // Target should not return.
         EMIT_BREAKPOINT
@@ -84,7 +84,7 @@ OFFSET_OF_FRAME=(4 + SIZEOF__GSCookie)
         // On entry:
         //
         // R0 = Address of FaultingExceptionFrame
-        bl LinkFrameAndThrow
+        bl C_FUNC(LinkFrameAndThrow)
 
         // Target should not return.
         EMIT_BREAKPOINT
